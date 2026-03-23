@@ -37,7 +37,7 @@
                 <div class="user-wallet">
                     <span>Fichas: </span>
                     <strong id="wallet-balance">1000</strong>
-                    <button id="btn-recharge" class="glass-btn small-btn" style="margin-left: 10px; padding: 4px 8px; font-size: 0.7rem; border-color: rgba(0, 255, 136, 0.4);">+ Recargar</button>
+                    <button id="btn-recharge-modal" class="glass-btn small-icon-btn" style="margin-left: 10px; border-color: rgba(0, 255, 136, 0.4);">+</button>
                 </div>
             </header>
 
@@ -49,6 +49,37 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- Modal Principal de Recarga/Retiro -->
+    <div id="wallet-modal" class="modal-overlay">
+        <div class="glass-panel modal-content">
+            <span class="modal-emoji">💰</span>
+            <h2 class="text-neon-blue">Gestión de Fichas</h2>
+            <p style="color: #aaa; margin-top: 10px;">Ingresa la cantidad deseada</p>
+            
+            <div class="chip-input-group">
+                <button id="btn-minus-5" class="glass-btn step-btn">-5</button>
+                <input type="number" id="input-chip-amount" class="chip-number-input" value="100" min="5" step="5">
+                <button id="btn-plus-5" class="glass-btn step-btn">+5</button>
+            </div>
+
+            <div class="modal-actions">
+                <button id="btn-action-add" class="glass-btn primary-btn" style="background: rgba(0, 255, 136, 0.2); border-color: #00ff88;">Aumentar</button>
+                <button id="btn-action-remove" class="glass-btn primary-btn" style="background: rgba(255, 77, 77, 0.2); border-color: #ff4d4d;">Remover</button>
+            </div>
+            <button id="btn-close-modal" class="glass-btn secondary-btn" style="margin-top: 15px; width: 100%;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="glass-panel modal-content">
+            <span id="confirm-emoji" class="modal-emoji">✅</span>
+            <h2 id="confirm-title" class="text-neon-green">¡Confirmado!</h2>
+            <p id="confirm-text" style="color: #eee; margin: 15px 0; line-height: 1.5;"></p>
+            <button id="btn-confirm-ok" class="glass-btn primary-btn" style="width: 100%;">Entendido</button>
+        </div>
     </div>
 
     <script type="module" src="app.js"></script>

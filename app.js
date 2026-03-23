@@ -1,11 +1,12 @@
 import { initRouter } from './presentation/app_router.js';
+import * as Wallet from './domain/wallet_manager.js';
 
 /**
  * Punto de entrada principal para Casino UTM.
- * Se asegura de que el DOM esté listo antes de arrancar.
  */
 const startApp = () => {
     console.log('[App] Iniciando Casino UTM...');
+    Wallet.updateUI(); // Sincronizar fichas iniciales
     initRouter();
 };
 
