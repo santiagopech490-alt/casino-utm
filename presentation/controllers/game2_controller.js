@@ -1,15 +1,16 @@
 import * as ProbEngine from '../../domain/probability_engine.js';
 import * as Rules from '../../domain/game_rules.js';
+import * as Wallet from '../../domain/wallet_manager.js';
 
 let gameState = {
-    chips: 100,
+    sessionProfit: 0, // Ganancia/Pérdida en la sesión actual del juego
     rounds: 0,
     history: [],
     selectedColor: null,
     currentBet: 10,
     isAnimating: false,
     gameOver: false,
-    totalRotation: 0 // Para que la rotación sea acumulativa y no salte
+    totalRotation: 0
 };
 
 let ui = {};
@@ -25,10 +26,13 @@ export const initGame2 = () => {
 
 const cacheDOM = () => {
     const container = document.querySelector('.game-container');
+    const rechargeBtn = document.getElementById('btn-recharge');
+
     if (!container) return;
 
     ui = {
         container,
+        rechargeBtn,
         wheel: container.querySelector('#roulette-wheel'),
         resultNumber: container.querySelector('#result-number'),
         resultColorText: container.querySelector('#result-color-text'),
@@ -48,6 +52,14 @@ const cacheDOM = () => {
 };
 
 const bindEvents = () => {
+    // Vincular recarga global
+    if (ui.rechargeBtn) {
+        ui.rechargeBtn.onclick = () => {
+            Wallet.addChips(500);
+            updateUI();
+        };
+    }
+
     ui.betRange.oninput = (e) => {
         gameState.currentBet = parseInt(e.target.value);
         ui.betDisplay.textContent = gameState.currentBet;
@@ -58,7 +70,7 @@ const bindEvents = () => {
     });
 
     ui.btnSpin.onclick = handleSpin;
-    ui.btnWithdraw.onclick = () => showConclusion(false);
+    ui.btnWithdraw.onclick = handleWithdraw;
     ui.btnRestart.onclick = resetGameState;
 };
 
@@ -74,7 +86,8 @@ const selectColor = (color) => {
 const handleSpin = async () => {
     if (gameState.isAnimating || gameState.gameOver) return;
 
-    const validation = Rules.validateBet(gameState.chips, gameState.currentBet);
+    // Validar contra el Wallet global
+    const validation = Rules.validateBet(Wallet.getBalance(), gameState.currentBet);
     if (!validation.valid) {
         alert(validation.message);
         return;
@@ -84,26 +97,38 @@ const handleSpin = async () => {
     ui.btnSpin.disabled = true;
     ui.btnWithdraw.disabled = true;
 
+    // Restar apuesta del Wallet Global
+    Wallet.subtractChips(gameState.currentBet);
+    gameState.sessionProfit -= gameState.currentBet;
+
     // Obtener resultado matemático
     const result = ProbEngine.spinRoulette();
-    const payout = ProbEngine.calculatePayout(gameState.currentBet, gameState.selectedColor, result.color);
+    // calculamos el premio (incluye devolver la apuesta si gana)
+    const winAmount = ProbEngine.calculatePayout(gameState.currentBet, gameState.selectedColor, result.color);
+    
+    // Si gana, devolvemos la apuesta + el premio al Wallet
+    let finalPayout = 0;
+    if (winAmount > 0) {
+        finalPayout = gameState.currentBet + winAmount;
+        Wallet.addChips(finalPayout);
+        gameState.sessionProfit += finalPayout;
+    }
 
     // Animación visual
     await animateWheel(result);
 
     // Actualizar estado
-    gameState.chips += payout;
     gameState.rounds++;
     gameState.history.push(result.color);
     
-    // UI
-    ui.statLastPayout.textContent = payout > 0 ? `+${payout}` : payout;
-    ui.statLastPayout.className = `stat-value ${payout > 0 ? 'text-neon-green' : (payout < 0 ? 'text-neon-red' : '')}`;
+    // UI Local
+    ui.statLastPayout.textContent = winAmount > 0 ? `+${winAmount}` : `-${gameState.currentBet}`;
+    ui.statLastPayout.className = `stat-value ${winAmount > 0 ? 'text-neon-green' : 'text-neon-red'}`;
     
     updateUI();
 
-    // Comprobar bancarrota
-    if (gameState.chips <= -1000) {
+    // Comprobar bancarrota global
+    if (Wallet.getBalance() <= -1000) {
         showConclusion(true);
     }
 
@@ -112,19 +137,20 @@ const handleSpin = async () => {
     ui.btnWithdraw.disabled = false;
 };
 
+const handleWithdraw = () => {
+    if (gameState.isAnimating) return;
+    showConclusion(false);
+};
+
 const animateWheel = (result) => {
     return new Promise((resolve) => {
-        // La rotación siempre aumenta para que gire hacia adelante
-        // 1800 grados = 5 vueltas completas mínimas
         gameState.totalRotation += 1800 + Math.random() * 360; 
-        
         ui.wheel.style.transition = 'transform 3s cubic-bezier(0.1, 0, 0.1, 1)';
         ui.wheel.style.transform = `rotate(${gameState.totalRotation}deg)`;
 
-        // Mostramos el resultado al final de la animación
         setTimeout(() => {
             ui.resultNumber.textContent = result.number;
-            ui.resultColorText.textContent = result.color;
+            ui.resultColorText.textContent = result.color.toUpperCase();
             ui.resultColorText.className = `color-${result.color}`;
             resolve();
         }, 3000);
@@ -132,9 +158,10 @@ const animateWheel = (result) => {
 };
 
 const updateUI = () => {
-    ui.statChips.textContent = gameState.chips;
-    ui.statChips.classList.toggle('text-neon-red', gameState.chips < 0);
-    ui.statChips.classList.toggle('text-neon-blue', gameState.chips >= 0);
+    // Mostramos el beneficio/pérdida de la sesión actual
+    ui.statChips.textContent = gameState.sessionProfit;
+    ui.statChips.classList.toggle('text-neon-red', gameState.sessionProfit < 0);
+    ui.statChips.classList.toggle('text-neon-green', gameState.sessionProfit > 0);
     
     ui.statRounds.textContent = gameState.rounds;
 
@@ -145,6 +172,9 @@ const updateUI = () => {
         dot.className = `history-dot bg-${color}`;
         ui.historyContainer.appendChild(dot);
     });
+
+    // Actualizar Wallet Global por si acaso
+    Wallet.updateUI();
 };
 
 const showConclusion = (isBankruptcy) => {
@@ -152,18 +182,19 @@ const showConclusion = (isBankruptcy) => {
     ui.conclusion.classList.remove('hidden');
     ui.conclusion.classList.add('animate-slide-up');
     
-    const houseEdgeMsg = "Matemáticamente, el casino siempre tiene la ventaja debido al espacio verde (0).";
+    const houseEdgeMsg = "Matemáticamente, el casino siempre tiene la ventaja debido al espacio verde (2.7% de ventaja).";
     
     if (isBankruptcy) {
-        ui.conclusionText.innerHTML = `<strong>¡Bancarrota!</strong> Has alcanzado el límite de deuda. <br><br> ${houseEdgeMsg} Mientras más juegas, más probable es que la ventaja de la casa del 2.7% consuma tus fichas.`;
+        ui.conclusionText.innerHTML = `<strong>¡Bancarrota Total!</strong> Has superado tu límite de crédito en el casino. <br><br> ${houseEdgeMsg} A largo plazo, el valor esperado de cada apuesta es negativo.`;
     } else {
-        ui.conclusionText.innerHTML = `<strong>Te has retirado con ${gameState.chips} fichas.</strong> <br><br> ${houseEdgeMsg} La ley de los grandes números demuestra que la única forma segura de no perder dinero en un casino es no jugar.`;
+        const balanceStatus = gameState.sessionProfit >= 0 ? 'ganancia' : 'pérdida';
+        ui.conclusionText.innerHTML = `<strong>Sesión Finalizada.</strong> Te retiras con una ${balanceStatus} de ${Math.abs(gameState.sessionProfit)} fichas en esta mesa. <br><br> ${houseEdgeMsg} El casino no necesita suerte, solo tiempo y jugadores.`;
     }
 };
 
 const resetGameState = () => {
     gameState = {
-        chips: 100,
+        sessionProfit: 0,
         rounds: 0,
         history: [],
         selectedColor: null,
@@ -180,7 +211,7 @@ const resetGameState = () => {
     ui.btnSpin.disabled = true;
     ui.btnWithdraw.disabled = false;
     ui.resultNumber.textContent = "--";
-    ui.resultColorText.textContent = "Gira la ruleta";
+    ui.resultColorText.textContent = "LISTO PARA GIRAR";
     ui.resultColorText.className = "";
     ui.statLastPayout.textContent = "0";
     
