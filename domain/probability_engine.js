@@ -47,4 +47,45 @@ export const calculateCoinStats = (history) => {
         percCaras: Math.round((caras / total) * 100),
         percCruces: Math.round((cruces / total) * 100)
     };
+};
+
+/**
+ * Función: Simula el giro de una ruleta europea (37 bolsillos).
+ * @returns {object} { number: 0-36, color: 'verde'|'rojo'|'negro' }
+ */
+export const spinRoulette = () => {
+    const number = Math.floor(Math.random() * 37);
+    let color = '';
+
+    if (number === 0) {
+        color = 'verde';
+    } else {
+        // En la ruleta europea, los rojos y negros se alternan de forma específica, 
+        // pero para el propósito estadístico 18 rojos y 18 negros es equivalente.
+        const reds = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        color = reds.includes(number) ? 'rojo' : 'negro';
+    }
+
+    return { number, color };
+};
+
+/**
+ * Función: Calcula el pago neto basado en la apuesta y el resultado.
+ * @param {number} betAmount - Cantidad apostada.
+ * @param {string} betColor - Color apostado ('rojo', 'negro', 'verde').
+ * @param {string} resultColor - Color resultante del giro.
+ * @returns {number} Ganancia neta (positiva si gana, negativa si pierde).
+ */
+export const calculatePayout = (betAmount, betColor, resultColor) => {
+    if (betColor === resultColor) {
+        if (betColor === 'verde') {
+            // El verde paga 35 a 1 en la ruleta real, lo cual mantiene la ventaja de la casa (1/37).
+            return betAmount * 35; 
+        } else {
+            // Rojo/Negro paga 1 a 1.
+            return betAmount;
+        }
+    }
+    // Si no coincide, pierdes la apuesta.
+    return -betAmount;
 };  

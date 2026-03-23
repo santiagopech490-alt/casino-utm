@@ -1,0 +1,116 @@
+/* =========================================
+   ESTILOS JUEGO 2: RULETA (EL CASINO GANA)
+   ========================================= */
+
+.ruleta-section {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.ruleta-wrapper {
+    position: relative;
+    width: 250px;
+    height: 250px;
+}
+
+/* Círculo de la ruleta estilizado */
+.roulette-wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 10px solid #333;
+    background: conic-gradient(
+        #008000 0% 2.7%,
+        #e61e1e 2.7% 8.1%,
+        #1a1a1a 8.1% 13.5%,
+        #e61e1e 13.5% 18.9%,
+        #1a1a1a 18.9% 24.3%,
+        #e61e1e 24.3% 29.7%,
+        #1a1a1a 29.7% 35.1%,
+        #e61e1e 35.1% 40.5%,
+        #1a1a1a 40.5% 45.9%,
+        #e61e1e 45.9% 51.3%,
+        #1a1a1a 51.3% 56.7%,
+        #e61e1e 56.7% 62.1%,
+        #1a1a1a 62.1% 67.5%,
+        #e61e1e 67.5% 72.9%,
+        #1a1a1a 72.9% 78.3%,
+        #e61e1e 78.3% 83.7%,
+        #1a1a1a 83.7% 89.1%,
+        #e61e1e 89.1% 94.5%,
+        #1a1a1a 94.5% 100%
+    );
+    box-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -20px;
+    font-size: 2rem;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+    z-index: 10;
+}
+
+.result-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.7) !important;
+    border: 2px solid rgba(255,255,255,0.2);
+    z-index: 5;
+}
+
+#result-number { font-size: 2.5rem; font-weight: bold; }
+#result-color-text { font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; }
+
+/* Colores de texto para resultados */
+.color-rojo { color: #ff4d4d; text-shadow: 0 0 8px rgba(255,77,77,0.5); }
+.color-negro { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+.color-verde { color: #00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.5); }
+
+/* Controles de Apuesta */
+.bet-selection, .bet-amount { margin-bottom: 20px; text-align: center; }
+.bet-selection h3, .bet-amount h3 { font-size: 0.9rem; color: #aaa; margin-bottom: 10px; }
+
+.color-buttons { display: flex; gap: 10px; justify-content: center; }
+
+.btn-bet-color.rojo { border-color: #ff4d4d; color: #ff4d4d; }
+.btn-bet-color.negro { border-color: #ffffff; color: #ffffff; }
+.btn-bet-color.verde { border-color: #00ff88; color: #00ff88; }
+
+.btn-bet-color.rojo.active-selection { background: rgba(255,77,77,0.3) !important; }
+.btn-bet-color.negro.active-selection { background: rgba(255,255,255,0.2) !important; }
+.btn-bet-color.verde.active-selection { background: rgba(0,255,136,0.3) !important; }
+
+.amount-selector { display: flex; align-items: center; gap: 15px; justify-content: center; }
+#bet-range { width: 200px; accent-color: #00ff88; }
+#bet-display { font-size: 1.5rem; font-weight: bold; width: 40px; }
+
+/* Historial */
+.history-log { margin-top: 20px; }
+.history-log h3 { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
+.history-flex { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+.history-dot { width: 12px; height: 12px; border-radius: 50%; }
+.bg-rojo { background: #ff4d4d; box-shadow: 0 0 5px rgba(255,77,77,0.5); }
+.bg-negro { background: #444; border: 1px solid #666; }
+.bg-verde { background: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,0.5); }
+
+/* Estados de Error/Alerta */
+.text-neon-red { color: #ff4d4d; text-shadow: 0 0 10px rgba(255,77,77,0.5); }
+
+.conclusion-box h3.text-neon-red { margin-bottom: 10px; }

@@ -1,0 +1,73 @@
+<div class="glass-panel game-container animate-fade-in">
+    
+    <header class="game-header">
+        <h1 class="text-neon-blue">¿Puedes ganarle al casino?</h1>
+        <div class="myth-box glass-panel-dark">
+            <p><strong>El Mito:</strong> "Si juegas suficiente tiempo, terminarás recuperando lo perdido y ganando."</p>
+        </div>
+    </header>
+
+    <div class="ruleta-section">
+        <div class="ruleta-wrapper">
+            <div id="roulette-wheel" class="roulette-wheel">
+                <!-- Se llenará dinámicamente o por CSS -->
+                <div class="wheel-pointer">▼</div>
+            </div>
+            <div id="roulette-result" class="result-display glass-panel">
+                <span id="result-number">--</span>
+                <span id="result-color-text">Gira la ruleta</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="betting-controls glass-panel-dark">
+        <div class="bet-selection">
+            <h3>Selecciona Color</h3>
+            <div class="color-buttons">
+                <button class="glass-btn btn-bet-color rojo" data-color="rojo">Rojo (1:1)</button>
+                <button class="glass-btn btn-bet-color negro" data-color="negro">Negro (1:1)</button>
+                <button class="glass-btn btn-bet-color verde" data-color="verde">Verde (35:1)</button>
+            </div>
+        </div>
+
+        <div class="bet-amount">
+            <h3>Cantidad a Apostar</h3>
+            <div class="amount-selector">
+                <input type="range" id="bet-range" min="10" max="100" step="10" value="10">
+                <span id="bet-display" class="text-neon-green">10</span>
+            </div>
+        </div>
+        
+        <div class="action-group">
+            <button id="btn-spin" class="glass-btn primary-btn" disabled>Apostar y Girar</button>
+            <button id="btn-withdraw" class="glass-btn secondary-btn">Retirarse</button>
+        </div>
+    </div>
+
+    <section class="stats-tracker">
+        <div class="glass-panel-dark stat-card">
+            <span class="stat-label">Tus Fichas</span>
+            <strong id="stat-chips" class="stat-value text-neon-blue">100</strong>
+        </div>
+        <div class="glass-panel-dark stat-card">
+            <span class="stat-label">Rondas</span>
+            <strong id="stat-rounds" class="stat-value">0</strong>
+        </div>
+        <div class="glass-panel-dark stat-card">
+            <span class="stat-label">Último Pago</span>
+            <strong id="stat-last-payout" class="stat-value">0</strong>
+        </div>
+    </section>
+
+    <div id="history-log" class="glass-panel-dark history-log">
+        <h3>Historial de Resultados</h3>
+        <div id="history-container" class="history-flex"></div>
+    </div>
+
+    <footer id="game-conclusion" class="conclusion-box glass-panel-dark hidden">
+        <h3 class="text-neon-red">La Realidad Matemática</h3>
+        <p id="conclusion-text"></p>
+        <button id="btn-restart-game2" class="glass-btn secondary-btn">Reiniciar Simulación</button>
+    </footer>
+
+</div>

@@ -16,11 +16,18 @@ const ROUTES = {
     game1: {
         title: 'La Falacia del Jugador',
         view: 'presentation/views/game1_falacia.html',
-        controller: './controllers/game1_controller.js',
+        controller: './controllers/game1_controller.js', // Singular
         css: 'assets/css/game1.css',
         init: 'initGame1'
+    },
+    game2: {
+        title: '¿Puedes ganarle al casino?',
+        view: 'presentation/views/game2_ruleta.html',
+        controller: './controllers/game2_controller.js',
+        css: 'assets/css/game2.css',
+        init: 'initGame2'
     }
-};
+    };
 
 let currentCSSLink = null;
 
