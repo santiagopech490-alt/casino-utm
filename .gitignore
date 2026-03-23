@@ -1,0 +1,11 @@
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+
+# Archivos del Sistema
+.DS_Store
+Thumbs.db
+
+# Temporales de Gemini/Herramientas
+.gemini/

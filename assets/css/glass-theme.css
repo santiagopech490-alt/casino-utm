@@ -1,0 +1,114 @@
+/* =========================================
+   GLASSMORPHISM THEME (Estilo Win 11)
+   ========================================= */
+
+/* Panel genérico de cristal */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+}
+
+.sidebar-header {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h2 {
+    color: #e0d4ff; /* Tono neón suave */
+    font-size: 1.5rem;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* --- TOPBAR --- */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    height: 70px;
+}
+
+.user-wallet {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #00ff88;
+}
+
+.user-wallet strong {
+    font-size: 1.2rem;
+    margin-left: 5px;
+}
+
+/* --- ÁREA DE CONTENIDO (JUEGOS) --- */
+.content-area {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto; /* Scroll interno solo si el juego es muy largo */
+    position: relative;
+}
+
+.welcome-message {
+    text-align: center;
+    margin-top: 20%;
+}
+
+/* --- BOTONES ESTILO GLASS --- */
+.glass-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e6e6e6;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.glass-btn.active {
+    background: rgba(138, 43, 226, 0.2); /* Morado neón translúcido */
+    border-color: rgba(138, 43, 226, 0.5);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+/* Custom Scrollbar para el estilo limpio */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASINO UTM | Rompiendo Mitos</title>
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/glass-theme.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <aside class="glass-panel sidebar">
+            <div class="sidebar-header">
+                <h2>CASINO UTM</h2>
+                <p>Probabilidad y Estadística</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="glass-btn nav-btn active" data-target="game1">1. Falacia del Jugador</button>
+                <button class="glass-btn nav-btn" data-target="game2">2. Ganarle al Casino</button>
+                <button class="glass-btn nav-btn" data-target="game3">3. Carta que nunca sale</button>
+                <button class="glass-btn nav-btn" data-target="game4">4. Contagio en el salón</button>
+                <button class="glass-btn nav-btn" data-target="game5">5. Suerte y N° de Intentos</button>
+                <button class="glass-btn nav-btn" data-target="game6">6. Loot Box Simulator</button>
+                <button class="glass-btn nav-btn" data-target="game7">7. ¿Qué número saldrá?</button>
+                <button class="glass-btn nav-btn" data-target="game8">8. Ilusión de Precisión</button>
+            </nav>
+        </aside>
+
+        <main class="main-workspace">
+            
+            <header class="glass-panel topbar">
+                <div class="topbar-title">
+                    <h3 id="current-game-title">Selecciona un juego</h3>
+                </div>
+                <div class="user-wallet">
+                    <span>Fichas: </span>
+                    <strong id="wallet-balance">1000</strong>
+                </div>
+            </header>
+
+            <section id="main-content" class="glass-panel content-area">
+                <div class="welcome-message">
+                    <h2>Bienvenido al Casino UTM</h2>
+                    <p>Selecciona un minijuego en el panel izquierdo para comenzar a romper mitos.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

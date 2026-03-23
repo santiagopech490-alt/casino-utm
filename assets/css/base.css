@@ -1,0 +1,43 @@
+/* =========================================
+   BASE & RESET
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    /* Fondo oscuro vibrante para resaltar el efecto Glassmorphism */
+    background: radial-gradient(circle at top left, #1a0b2e, #0f0518 50%, #050b14);
+    background-attachment: fixed;
+    color: #ffffff;
+    min-height: 100vh;
+    overflow: hidden; /* Evita scroll en toda la página, se hará en los paneles */
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
+}
+
+.main-workspace {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+}
+
+/* Tipografía básica */
+h1, h2, h3 {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+p {
+    color: #b3b3b3;
+    line-height: 1.5;
+}

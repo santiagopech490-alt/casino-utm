@@ -1,0 +1,62 @@
+<div class="glass-panel game-container animate-fade-in">
+    
+    <header class="game-header">
+        <h1 class="text-neon-purple">La Falacia del Jugador</h1>
+        <div class="myth-box glass-panel-dark">
+            <p><strong>El Mito:</strong> "Si algo ha pasado muchas veces seguidas (ej. Cara), ahora es menos probable que vuelva a pasar."</p>
+        </div>
+    </header>
+
+    <div class="coin-section">
+        <div class="coin-wrapper">
+            <div id="coin" class="coin">
+                <div class="side-a">C</div> <div class="side-b">X</div> </div>
+        </div>
+        <div id="sequence-timeline" class="timeline-flex"></div>
+    </div>
+
+    <div class="game-controls glass-panel-dark">
+        <h3>Predecir siguiente lanzamiento:</h3>
+        <div class="selection-group">
+            <button class="glass-btn btn-choice" data-choice="cara">
+                <span class="coin-icon">C</span> Cara
+            </button>
+            <button class="glass-btn btn-choice" data-choice="cruz">
+                <span class="coin-icon">X</span> Cruz
+            </button>
+        </div>
+        
+        <div class="action-group">
+            <button id="btn-flip-1" class="glass-btn primary-btn" disabled>Lanzar 1x1</button>
+            <button id="btn-flip-20" class="glass-btn secondary-btn">Simular 20 lanzamientos</button>
+        </div>
+        <p class="instruction-text">*Selecciona Cara o Cruz para habilitar el lanzamiento 1x1.</p>
+    </div>
+
+    <section class="stats-tracker">
+        <div class="glass-panel-dark stat-card">
+            <span class="stat-label">Total Lanzamientos</span>
+            <strong id="stat-total" class="stat-value text-neon-blue">0</strong>
+        </div>
+        <div class="glass-panel-dark stat-card">
+            <span class="stat-label">Veces Cara (C)</span>
+            <strong id="stat-caras" class="stat-value">0</strong>
+            <span id="perc-caras" class="stat-perc">0%</span>
+        </div>
+        <div class="glass-panel-dark stat-card">
+            <span class="stat-label">Veces Cruz (X)</span>
+            <strong id="stat-cruces" class="stat-value">0</strong>
+            <span id="perc-cruces" class="stat-perc">0%</span>
+        </div>
+        <div class="glass-panel-dark stat-card success-card">
+            <span class="stat-label">Tus Aciertos</span>
+            <strong id="stat-hits" class="stat-value text-neon-green">0</strong>
+        </div>
+    </section>
+
+    <footer id="game-conclusion" class="conclusion-box glass-panel-dark hidden">
+        <h3 class="text-neon-green">¡Mito Rompido!</h3>
+        <p id="conclusion-text"></p>
+    </footer>
+
+</div>
