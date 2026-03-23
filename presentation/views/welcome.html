@@ -1,34 +1,45 @@
-<div class="glass-panel welcome-container animate-fade-in">
+<div class="glass-panel welcome-container animate-fade-in" style="padding: 50px; text-align: center; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px;">
+    
     <header class="welcome-header">
-        <h1 class="text-neon-blue">Bienvenido al Proyecto CASINO UTM</h1>
-        <p class="subtitle">Probabilidad y Estadística - Ingeniería DSM</p>
+        <div class="welcome-icon" style="font-size: 5rem; margin-bottom: 15px; display: inline-block; animation: bounce 2s infinite;">🎰</div>
+        <h1 class="text-neon-blue" style="font-size: 2.8rem; margin-bottom: 10px; line-height: 1.2;">Bienvenido al Proyecto CASINO UTM</h1>
+        <p class="subtitle" style="color: rgba(255,255,255,0.6); letter-spacing: 3px; font-size: 0.9rem; text-transform: uppercase;">Probabilidad y Estadística • Ingeniería DSM</p>
     </header>
 
-    <section class="welcome-body glass-panel-dark">
-        <h2 class="text-neon-purple">Desafiando a la Suerte</h2>
-        <p>
-            ¿Alguna vez has sentido que la "suerte" te debe una victoria? 
-            En este casino interactivo, no venimos a apostar dinero, sino a <strong>romper mitos</strong>.
-        </p>
-        <p>
-            A través de <strong>8 juegos dinámicos</strong>, exploraremos cómo las leyes de la probabilidad 
-            gobiernan el azar, demostrando que muchos de nuestros instintos sobre el juego son, en realidad, 
-            ilusiones matemáticas.
-        </p>
-    </section>
-
-    <section class="cta-section">
-        <div class="feature-card glass-panel">
-            <h3 class="text-neon-green">Comienza por el Inicio</h3>
-            <p>
-                Hemos completado el <strong>Juego 1: La Falacia del Jugador</strong>. 
-                Descubre por qué una moneda no tiene memoria y por qué las rachas no garantizan un cambio de suerte.
+    <section class="welcome-body glass-panel-dark" style="padding: 40px; border-radius: 25px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+        <h2 class="text-neon-purple" style="margin-bottom: 25px; font-size: 1.8rem;">🎲 Desafiando a la Suerte</h2>
+        <div style="text-align: justify; line-height: 1.8; color: #f0f0f0; font-size: 1.15rem;">
+            <p style="margin-bottom: 20px;">
+                ¿Alguna vez has sentido que la "suerte" te debe una victoria? En este casino interactivo, no venimos a apostar dinero, sino a <strong>romper mitos</strong> mediante el rigor matemático.
             </p>
-            <button class="glass-btn primary-btn" id="btn-start-game1">Probar Juego 1 Now</button>
+            <p>
+                A través de <strong>8 juegos dinámicos</strong>, exploraremos cómo las leyes de la probabilidad gobiernan el azar, demostrando que muchos de nuestros instintos sobre el juego son, en realidad, ilusiones estadísticas que podemos entender y dominar.
+            </p>
         </div>
     </section>
 
-    <footer class="welcome-footer">
-        <p>Selecciona cualquier mito del panel izquierdo para comenzar la investigación.</p>
+    <section class="cta-section">
+        <div class="feature-card glass-panel" style="padding: 35px; border: 1px solid rgba(0,255,136,0.3); background: rgba(0,255,136,0.03); border-radius: 20px;">
+            <h3 class="text-neon-green" style="margin-bottom: 15px; font-size: 1.4rem;">🚀 Comienza la Investigación</h3>
+            <p style="margin-bottom: 25px; color: #d0d0d0; font-size: 1rem;">
+                Hemos completado el <strong>Juego 1: La Falacia del Jugador</strong>. <br>
+                Descubre por qué una moneda no tiene memoria y por qué las rachas no garantizan un cambio de fortuna.
+            </p>
+            <button class="glass-btn primary-btn" id="btn-start-game1" style="padding: 15px 40px; font-size: 1.1rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+                Probar Juego 1 Ahora
+            </button>
+        </div>
+    </section>
+
+    <footer class="welcome-footer" style="margin-top: 10px; color: rgba(255,255,255,0.4); font-style: italic;">
+        <p>Selecciona cualquier mito del panel izquierdo para comenzar tu análisis.</p>
     </footer>
+
+    <style>
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+    </style>
 </div>
