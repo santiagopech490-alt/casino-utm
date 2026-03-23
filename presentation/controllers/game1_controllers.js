@@ -1,6 +1,13 @@
 import * as ProbEngine from '../../domain/probability_engine.js';
 
-let gameState = { history: [], userCurrentChoice: null, userHits: 0, isAnimating: false };
+let gameState = { 
+    history: [], 
+    userCurrentChoice: null, 
+    userHits: 0, 
+    userMisses: 0, 
+    isAnimating: false 
+};
+
 let ui = {};
 
 /**
@@ -15,7 +22,7 @@ export const initGame1 = () => {
     }
     bindEvents();
     resetGame();
-    console.log('[Game1 Controller] Listo y vinculado.');
+    console.log('[Game1 Controller] Listo y vinculado con rastreo de fallos.');
 };
 
 const cacheDOM = () => {
@@ -36,7 +43,8 @@ const cacheDOM = () => {
             cruces: container.querySelector('#stat-cruces'),
             percCaras: container.querySelector('#perc-caras'),
             percCruces: container.querySelector('#perc-cruces'),
-            hits: container.querySelector('#stat-hits')
+            hits: container.querySelector('#stat-hits'),
+            misses: container.querySelector('#stat-misses')
         },
         conclusion: container.querySelector('#game-conclusion'),
         conclusionText: container.querySelector('#conclusion-text')
@@ -60,14 +68,19 @@ const selectChoice = (choice) => {
 };
 
 const handleSingleFlip = async () => {
-    if (gameState.isAnimating) return;
+    if (gameState.isAnimating || !gameState.userCurrentChoice) return;
     gameState.isAnimating = true;
     ui.btnFlip1.disabled = true;
 
     const result = ProbEngine.flipCoinPure();
     gameState.history.push(result);
 
-    if (result === gameState.userCurrentChoice) gameState.userHits++;
+    // Lógica de Acierto vs Fallo
+    if (result === gameState.userCurrentChoice) {
+        gameState.userHits++;
+    } else {
+        gameState.userMisses++;
+    }
 
     await animateCoin(result);
     updateUI();
@@ -94,13 +107,17 @@ const animateCoin = (result) => {
 
 const updateUI = (isBatch = false) => {
     const stats = ProbEngine.calculateCoinStats(gameState.history);
+    
+    // Actualizar Dashboard
     ui.stats.total.textContent = stats.total;
     ui.stats.caras.textContent = stats.caras;
     ui.stats.cruces.textContent = stats.cruces;
     ui.stats.percCaras.textContent = `${stats.percCaras}%`;
     ui.stats.percCruces.textContent = `${stats.percCruces}%`;
     ui.stats.hits.textContent = gameState.userHits;
+    ui.stats.misses.textContent = gameState.userMisses;
 
+    // Actualizar Línea de tiempo
     ui.timeline.innerHTML = '';
     gameState.history.slice(-10).forEach(res => {
         const bubble = document.createElement('div');
@@ -109,6 +126,7 @@ const updateUI = (isBatch = false) => {
         ui.timeline.appendChild(bubble);
     });
 
+    // Romper el mito tras 15 lanzamientos
     if (stats.total >= 15 && ui.conclusion.classList.contains('hidden')) {
         ui.conclusion.classList.remove('hidden');
         ui.conclusionText.innerHTML = `Tras <strong>${stats.total}</strong> lanzamientos... cada lanzamiento es <strong>independiente</strong>. La probabilidad es siempre <strong>50/50</strong>.`;
@@ -116,7 +134,13 @@ const updateUI = (isBatch = false) => {
 };
 
 const resetGame = () => {
-    gameState = { history: [], userCurrentChoice: null, userHits: 0, isAnimating: false };
+    gameState = { 
+        history: [], 
+        userCurrentChoice: null, 
+        userHits: 0, 
+        userMisses: 0, 
+        isAnimating: false 
+    };
     ui.conclusion.classList.add('hidden');
     ui.btnFlip1.disabled = true;
     updateUI();
