@@ -2,17 +2,28 @@
    ESTILOS JUEGO 2: RULETA (EL CASINO GANA)
    ========================================= */
 
+.game-container {
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
 .ruleta-section {
     display: flex;
     justify-content: center;
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: 20px 0;
 }
 
 .ruleta-wrapper {
     position: relative;
-    width: 250px;
-    height: 250px;
+    width: 280px;
+    height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Círculo de la ruleta estilizado */
@@ -20,7 +31,7 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 10px solid #333;
+    border: 12px solid #222;
     background: conic-gradient(
         #008000 0% 2.7%,
         #e61e1e 2.7% 8.1%,
@@ -42,19 +53,20 @@
         #e61e1e 89.1% 94.5%,
         #1a1a1a 94.5% 100%
     );
-    box-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.1);
-    display: flex;
-    justify-content: center;
-    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6), 0 0 20px rgba(255,255,255,0.05);
+    transition: transform 3s cubic-bezier(0.1, 0, 0.1, 1);
 }
 
 .wheel-pointer {
     position: absolute;
-    top: -20px;
-    font-size: 2rem;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
     color: #ffd700;
-    text-shadow: 0 0 10px rgba(255,215,0,0.5);
-    z-index: 10;
+    text-shadow: 0 0 15px rgba(255,215,0,0.6);
+    z-index: 20;
+    pointer-events: none;
 }
 
 .result-display {
@@ -62,55 +74,68 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(0,0,0,0.7) !important;
-    border: 2px solid rgba(255,255,255,0.2);
-    z-index: 5;
+    background: rgba(10, 10, 10, 0.85) !important;
+    border: 3px solid rgba(255,255,255,0.1);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+    z-index: 10;
 }
 
-#result-number { font-size: 2.5rem; font-weight: bold; }
-#result-color-text { font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; }
+#result-number { font-size: 2.8rem; font-weight: bold; margin-bottom: -5px; }
+#result-color-text { font-size: 0.75rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
 
 /* Colores de texto para resultados */
-.color-rojo { color: #ff4d4d; text-shadow: 0 0 8px rgba(255,77,77,0.5); }
-.color-negro { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
-.color-verde { color: #00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.5); }
+.color-rojo { color: #ff4d4d; text-shadow: 0 0 10px rgba(255,77,77,0.5); }
+.color-negro { color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+.color-verde { color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
 
-/* Controles de Apuesta */
-.bet-selection, .bet-amount { margin-bottom: 20px; text-align: center; }
-.bet-selection h3, .bet-amount h3 { font-size: 0.9rem; color: #aaa; margin-bottom: 10px; }
+/* Controles */
+.color-buttons { display: flex; gap: 15px; justify-content: center; }
 
-.color-buttons { display: flex; gap: 10px; justify-content: center; }
+.btn-bet-color {
+    padding: 10px 20px;
+    font-weight: bold;
+    min-width: 120px;
+}
 
-.btn-bet-color.rojo { border-color: #ff4d4d; color: #ff4d4d; }
-.btn-bet-color.negro { border-color: #ffffff; color: #ffffff; }
-.btn-bet-color.verde { border-color: #00ff88; color: #00ff88; }
+.active-selection {
+    border-width: 2px !important;
+    box-shadow: 0 0 15px currentColor !important;
+}
 
-.btn-bet-color.rojo.active-selection { background: rgba(255,77,77,0.3) !important; }
-.btn-bet-color.negro.active-selection { background: rgba(255,255,255,0.2) !important; }
-.btn-bet-color.verde.active-selection { background: rgba(0,255,136,0.3) !important; }
-
-.amount-selector { display: flex; align-items: center; gap: 15px; justify-content: center; }
-#bet-range { width: 200px; accent-color: #00ff88; }
-#bet-display { font-size: 1.5rem; font-weight: bold; width: 40px; }
+.amount-selector input[type="range"] {
+    width: 250px;
+    height: 8px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.1);
+}
 
 /* Historial */
-.history-log { margin-top: 20px; }
-.history-log h3 { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
-.history-flex { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.history-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    min-height: 30px;
+}
 
-.history-dot { width: 12px; height: 12px; border-radius: 50%; }
-.bg-rojo { background: #ff4d4d; box-shadow: 0 0 5px rgba(255,77,77,0.5); }
-.bg-negro { background: #444; border: 1px solid #666; }
-.bg-verde { background: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,0.5); }
+.history-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
 
-/* Estados de Error/Alerta */
+.history-dot:hover { transform: scale(1.3); }
+
+/* Utilitarios */
 .text-neon-red { color: #ff4d4d; text-shadow: 0 0 10px rgba(255,77,77,0.5); }
-
-.conclusion-box h3.text-neon-red { margin-bottom: 10px; }
+.bg-rojo { background: #ff4d4d; box-shadow: 0 0 8px rgba(255,77,77,0.4); }
+.bg-negro { background: #333; border: 1px solid #555; }
+.bg-verde { background: #00ff88; box-shadow: 0 0 8px rgba(0,255,136,0.4); }

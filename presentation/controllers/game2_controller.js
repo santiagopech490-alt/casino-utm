@@ -8,13 +8,16 @@ let gameState = {
     selectedColor: null,
     currentBet: 10,
     isAnimating: false,
-    gameOver: false
+    gameOver: false,
+    totalRotation: 0 // Para que la rotación sea acumulativa y no salte
 };
 
 let ui = {};
 
 export const initGame2 = () => {
     cacheDOM();
+    if (!ui.container) return;
+    
     bindEvents();
     resetGameState();
     updateUI();
@@ -95,11 +98,11 @@ const handleSpin = async () => {
     
     // UI
     ui.statLastPayout.textContent = payout > 0 ? `+${payout}` : payout;
-    ui.statLastPayout.className = `stat-value ${payout >= 0 ? 'text-neon-green' : 'text-neon-red'}`;
+    ui.statLastPayout.className = `stat-value ${payout > 0 ? 'text-neon-green' : (payout < 0 ? 'text-neon-red' : '')}`;
     
     updateUI();
 
-    // Comprobar bancarrota o límites
+    // Comprobar bancarrota
     if (gameState.chips <= -1000) {
         showConclusion(true);
     }
@@ -111,28 +114,31 @@ const handleSpin = async () => {
 
 const animateWheel = (result) => {
     return new Promise((resolve) => {
+        // La rotación siempre aumenta para que gire hacia adelante
+        // 1800 grados = 5 vueltas completas mínimas
+        gameState.totalRotation += 1800 + Math.random() * 360; 
+        
         ui.wheel.style.transition = 'transform 3s cubic-bezier(0.1, 0, 0.1, 1)';
-        const randomRotation = 1440 + Math.random() * 360; // Mínimo 4 vueltas
-        ui.wheel.style.transform = `rotate(${randomRotation}deg)`;
+        ui.wheel.style.transform = `rotate(${gameState.totalRotation}deg)`;
 
+        // Mostramos el resultado al final de la animación
         setTimeout(() => {
             ui.resultNumber.textContent = result.number;
-            ui.resultColorText.textContent = result.color.toUpperCase();
+            ui.resultColorText.textContent = result.color;
             ui.resultColorText.className = `color-${result.color}`;
-            // Reset rotación suavemente para el siguiente tiro
-            ui.wheel.style.transition = 'none';
-            ui.wheel.style.transform = 'rotate(0deg)';
             resolve();
-        }, 3100);
+        }, 3000);
     });
 };
 
 const updateUI = () => {
     ui.statChips.textContent = gameState.chips;
-    ui.statChips.className = `stat-value ${gameState.chips < 0 ? 'text-neon-red' : 'text-neon-blue'}`;
+    ui.statChips.classList.toggle('text-neon-red', gameState.chips < 0);
+    ui.statChips.classList.toggle('text-neon-blue', gameState.chips >= 0);
+    
     ui.statRounds.textContent = gameState.rounds;
 
-    // Historial (últimos 15)
+    // Historial
     ui.historyContainer.innerHTML = '';
     gameState.history.slice(-15).forEach(color => {
         const dot = document.createElement('div');
@@ -144,15 +150,14 @@ const updateUI = () => {
 const showConclusion = (isBankruptcy) => {
     gameState.gameOver = true;
     ui.conclusion.classList.remove('hidden');
-    ui.btnSpin.disabled = true;
-    ui.btnWithdraw.disabled = true;
-
-    const houseEdgeText = "La ruleta tiene 37 espacios. Al pagar 35 a 1 por el verde, o 1 a 1 por rojo/negro, el casino se queda con una ventaja del 2.7% (el espacio verde).";
+    ui.conclusion.classList.add('animate-slide-up');
+    
+    const houseEdgeMsg = "Matemáticamente, el casino siempre tiene la ventaja debido al espacio verde (0).";
     
     if (isBankruptcy) {
-        ui.conclusionText.innerHTML = `<strong>Has llegado al límite de deuda.</strong> <br><br> ${houseEdgeText} A largo plazo, la "Esperanza Matemática" de este juego es de aproximadamente -0.027 por cada ficha apostada. Esto significa que, estadísticamente, el casino siempre ganará si juegas lo suficiente.`;
+        ui.conclusionText.innerHTML = `<strong>¡Bancarrota!</strong> Has alcanzado el límite de deuda. <br><br> ${houseEdgeMsg} Mientras más juegas, más probable es que la ventaja de la casa del 2.7% consuma tus fichas.`;
     } else {
-        ui.conclusionText.innerHTML = `<strong>Te has retirado con ${gameState.chips} fichas.</strong> <br><br> ${houseEdgeText} Aunque puedas ganar en el corto plazo por pura varianza, la ley de los grandes números dicta que mientras más juegues, más te acercarás a la pérdida teórica del 2.7%.`;
+        ui.conclusionText.innerHTML = `<strong>Te has retirado con ${gameState.chips} fichas.</strong> <br><br> ${houseEdgeMsg} La ley de los grandes números demuestra que la única forma segura de no perder dinero en un casino es no jugar.`;
     }
 };
 
@@ -164,14 +169,21 @@ const resetGameState = () => {
         selectedColor: null,
         currentBet: 10,
         isAnimating: false,
-        gameOver: false
+        gameOver: false,
+        totalRotation: 0
     };
+    
+    ui.wheel.style.transition = 'none';
+    ui.wheel.style.transform = 'rotate(0deg)';
+    
     ui.conclusion.classList.add('hidden');
     ui.btnSpin.disabled = true;
     ui.btnWithdraw.disabled = false;
-    ui.statLastPayout.textContent = "0";
     ui.resultNumber.textContent = "--";
     ui.resultColorText.textContent = "Gira la ruleta";
+    ui.resultColorText.className = "";
+    ui.statLastPayout.textContent = "0";
+    
     ui.colorButtons.forEach(btn => btn.classList.remove('active-selection'));
     updateUI();
 };

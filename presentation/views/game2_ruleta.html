@@ -9,10 +9,10 @@
 
     <div class="ruleta-section">
         <div class="ruleta-wrapper">
-            <div id="roulette-wheel" class="roulette-wheel">
-                <!-- Se llenará dinámicamente o por CSS -->
-                <div class="wheel-pointer">▼</div>
-            </div>
+            <!-- El puntero ahora es independiente de la rueda -->
+            <div class="wheel-pointer">▼</div>
+            <div id="roulette-wheel" class="roulette-wheel"></div>
+            
             <div id="roulette-result" class="result-display glass-panel">
                 <span id="result-number">--</span>
                 <span id="result-color-text">Gira la ruleta</span>
@@ -21,8 +21,8 @@
     </div>
 
     <div class="betting-controls glass-panel-dark">
-        <div class="bet-selection">
-            <h3>Selecciona Color</h3>
+        <div class="bet-selection" style="margin-bottom: 25px;">
+            <h3 style="margin-bottom: 15px;">1. Selecciona Color</h3>
             <div class="color-buttons">
                 <button class="glass-btn btn-bet-color rojo" data-color="rojo">Rojo (1:1)</button>
                 <button class="glass-btn btn-bet-color negro" data-color="negro">Negro (1:1)</button>
@@ -30,21 +30,21 @@
             </div>
         </div>
 
-        <div class="bet-amount">
-            <h3>Cantidad a Apostar</h3>
+        <div class="bet-amount" style="margin-bottom: 25px;">
+            <h3 style="margin-bottom: 15px;">2. Cantidad a Apostar</h3>
             <div class="amount-selector">
                 <input type="range" id="bet-range" min="10" max="100" step="10" value="10">
-                <span id="bet-display" class="text-neon-green">10</span>
+                <span id="bet-display" class="text-neon-green" style="min-width: 45px; display: inline-block;">10</span>
             </div>
         </div>
         
-        <div class="action-group">
-            <button id="btn-spin" class="glass-btn primary-btn" disabled>Apostar y Girar</button>
-            <button id="btn-withdraw" class="glass-btn secondary-btn">Retirarse</button>
+        <div class="action-group" style="display: flex; gap: 20px; justify-content: center;">
+            <button id="btn-spin" class="glass-btn primary-btn" disabled style="padding: 12px 25px;">Apostar y Girar</button>
+            <button id="btn-withdraw" class="glass-btn secondary-btn" style="padding: 12px 25px;">Retirarse</button>
         </div>
     </div>
 
-    <section class="stats-tracker">
+    <section class="stats-tracker" style="margin-top: 30px;">
         <div class="glass-panel-dark stat-card">
             <span class="stat-label">Tus Fichas</span>
             <strong id="stat-chips" class="stat-value text-neon-blue">100</strong>
@@ -59,15 +59,15 @@
         </div>
     </section>
 
-    <div id="history-log" class="glass-panel-dark history-log">
-        <h3>Historial de Resultados</h3>
+    <div id="history-log" class="glass-panel-dark history-log" style="margin-top: 25px; padding: 20px;">
+        <h3 style="margin-bottom: 15px; color: #aaa;">Historial de Resultados</h3>
         <div id="history-container" class="history-flex"></div>
     </div>
 
-    <footer id="game-conclusion" class="conclusion-box glass-panel-dark hidden">
-        <h3 class="text-neon-red">La Realidad Matemática</h3>
-        <p id="conclusion-text"></p>
-        <button id="btn-restart-game2" class="glass-btn secondary-btn">Reiniciar Simulación</button>
+    <footer id="game-conclusion" class="conclusion-box glass-panel-dark hidden" style="margin-top: 30px; padding: 25px; border: 1px solid rgba(255, 77, 77, 0.4); background: rgba(50, 0, 0, 0.3);">
+        <h3 class="text-neon-red" style="margin-bottom: 15px;">La Realidad Matemática</h3>
+        <p id="conclusion-text" style="text-align: justify; line-height: 1.6; color: #eee; margin-bottom: 20px;"></p>
+        <button id="btn-restart-game2" class="glass-btn secondary-btn" style="width: 100%;">Reiniciar Simulación</button>
     </footer>
 
 </div>
