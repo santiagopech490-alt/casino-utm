@@ -48,6 +48,7 @@ const cacheDOM = () => {
         btnCruz: container.querySelector('[data-choice="cruz"]'),
         btnFlip1: container.querySelector('#btn-flip-1'),
         btnFlip20: container.querySelector('#btn-flip-20'),
+        btnReset: container.querySelector('#btn-reset'),
         stats: {
             total: container.querySelector('#stat-total'),
             caras: container.querySelector('#stat-caras'),
@@ -69,6 +70,7 @@ const bindEvents = () => {
     ui.btnCruz.onclick = () => selectChoice('cruz');
     ui.btnFlip1.onclick = handleSingleFlip;
     ui.btnFlip20.onclick = handleBatchSimulation;
+    ui.btnReset.onclick = resetGame;
 };
 
 const selectChoice = (choice) => {
