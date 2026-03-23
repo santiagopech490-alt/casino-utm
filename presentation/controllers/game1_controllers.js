@@ -1,5 +1,6 @@
 import * as ProbEngine from '../../domain/probability_engine.js';
 
+// Estado global persistente mientras la vista esté cargada
 let gameState = { 
     history: [], 
     userCurrentChoice: null, 
@@ -12,17 +13,27 @@ let ui = {};
 
 /**
  * Función: Inicializa el Juego 1.
- * Vincula el controlador con la vista inyectada en el DOM.
  */
 export const initGame1 = () => {
     cacheDOM();
-    if (!ui.container) {
-        console.error('[Game1 Controller] No se encontró .game-container en el DOM.');
-        return;
-    }
+    if (!ui.container) return;
+    
     bindEvents();
-    resetGame();
-    console.log('[Game1 Controller] Listo y vinculado con rastreo de fallos.');
+    
+    // Al reinicializar (ej. al volver a la pestaña), 
+    // mantenemos el historial pero reseteamos el estado de animación
+    gameState.isAnimating = false;
+    
+    // Reflejar estado actual en la UI
+    updateUI();
+    
+    // Habilitar botón de lanzamiento si hay una elección previa
+    if (gameState.userCurrentChoice) {
+        ui.btnFlip1.disabled = false;
+        selectChoice(gameState.userCurrentChoice);
+    }
+
+    console.log('[Game1 Controller] Inicializado correctamente.');
 };
 
 const cacheDOM = () => {
@@ -52,7 +63,7 @@ const cacheDOM = () => {
 };
 
 const bindEvents = () => {
-    if (!ui.btnCara || !ui.btnCruz) return;
+    if (!ui.btnCara) return;
 
     ui.btnCara.onclick = () => selectChoice('cara');
     ui.btnCruz.onclick = () => selectChoice('cruz');
@@ -61,79 +72,112 @@ const bindEvents = () => {
 };
 
 const selectChoice = (choice) => {
+    if (gameState.isAnimating) return;
+    
     gameState.userCurrentChoice = choice;
+    
+    // Estilo visual de selección
     ui.btnCara.classList.toggle('active-selection', choice === 'cara');
     ui.btnCruz.classList.toggle('active-selection', choice === 'cruz');
+    
     ui.btnFlip1.disabled = false;
 };
 
 const handleSingleFlip = async () => {
     if (gameState.isAnimating || !gameState.userCurrentChoice) return;
+    
     gameState.isAnimating = true;
     ui.btnFlip1.disabled = true;
+    ui.btnFlip20.disabled = true;
 
     const result = ProbEngine.flipCoinPure();
     gameState.history.push(result);
 
-    // Lógica de Acierto vs Fallo
+    // Registrar acierto/fallo
     if (result === gameState.userCurrentChoice) {
         gameState.userHits++;
     } else {
         gameState.userMisses++;
     }
 
+    // Ejecutar animación de la moneda
     await animateCoin(result);
+    
+    // Actualizar toda la interfaz
     updateUI();
     
+    // Liberar controles
     gameState.isAnimating = false;
     ui.btnFlip1.disabled = false;
+    ui.btnFlip20.disabled = false;
 };
 
 const handleBatchSimulation = () => {
     if (gameState.isAnimating) return;
+    
     const batchResults = ProbEngine.simulateBatchFlips(20);
     gameState.history.push(...batchResults);
-    updateUI(true);
+    
+    updateUI();
 };
 
 const animateCoin = (result) => {
     return new Promise((resolve) => {
+        // Reset clase para permitir repetir animación
         ui.coin.className = 'coin';
+        
+        // Forzar reflow
         void ui.coin.offsetWidth; 
-        ui.coin.classList.add(result === 'cara' ? 'animate-flip-cara' : 'animate-flip-cruz');
-        setTimeout(resolve, 1200);
+        
+        // Aplicar clase de giro
+        const flipClass = result === 'cara' ? 'animate-flip-cara' : 'animate-flip-cruz';
+        ui.coin.classList.add(flipClass);
+
+        // Esperar tiempo de la animación CSS (1.2s en game1.css)
+        setTimeout(() => {
+            resolve();
+        }, 1200);
     });
 };
 
-const updateUI = (isBatch = false) => {
+const updateUI = () => {
+    if (!ui.stats) return;
+
     const stats = ProbEngine.calculateCoinStats(gameState.history);
     
-    // Actualizar Dashboard
+    // 1. Números principales
     ui.stats.total.textContent = stats.total;
     ui.stats.caras.textContent = stats.caras;
     ui.stats.cruces.textContent = stats.cruces;
     ui.stats.percCaras.textContent = `${stats.percCaras}%`;
     ui.stats.percCruces.textContent = `${stats.percCruces}%`;
+    
+    // 2. Aciertos y Fallos
     ui.stats.hits.textContent = gameState.userHits;
     ui.stats.misses.textContent = gameState.userMisses;
 
-    // Actualizar Línea de tiempo
+    // 3. Timeline (Burbujas de historial)
     ui.timeline.innerHTML = '';
-    gameState.history.slice(-10).forEach(res => {
+    const recent = gameState.history.slice(-10);
+    recent.forEach(res => {
         const bubble = document.createElement('div');
         bubble.className = `timeline-bubble ${res === 'cara' ? 'bubble-cara' : 'bubble-cruz'}`;
         bubble.textContent = res === 'cara' ? 'C' : 'X';
         ui.timeline.appendChild(bubble);
     });
 
-    // Romper el mito tras 15 lanzamientos
-    if (stats.total >= 15 && ui.conclusion.classList.contains('hidden')) {
+    // 4. Conclusión dinámica
+    if (stats.total >= 15) {
         ui.conclusion.classList.remove('hidden');
-        ui.conclusionText.innerHTML = `Tras <strong>${stats.total}</strong> lanzamientos... cada lanzamiento es <strong>independiente</strong>. La probabilidad es siempre <strong>50/50</strong>.`;
+        ui.conclusion.classList.add('animate-slide-up');
+        ui.conclusionText.innerHTML = `Tras <strong>${stats.total}</strong> lanzamientos, la proporción es de <strong>${stats.percCaras}% Cara</strong> y <strong>${stats.percCruces}% Cruz</strong>. <br><br> La moneda no tiene memoria; cada tiro es una probabilidad <strong>independiente de 50/50</strong>, sin importar los resultados anteriores.`;
     }
 };
 
-const resetGame = () => {
+/**
+ * Función: Resetea el juego por completo.
+ */
+export const resetGame = () => {
     gameState = { 
         history: [], 
         userCurrentChoice: null, 
@@ -141,7 +185,7 @@ const resetGame = () => {
         userMisses: 0, 
         isAnimating: false 
     };
-    ui.conclusion.classList.add('hidden');
-    ui.btnFlip1.disabled = true;
+    if (ui.conclusion) ui.conclusion.classList.add('hidden');
+    if (ui.btnFlip1) ui.btnFlip1.disabled = true;
     updateUI();
 };
