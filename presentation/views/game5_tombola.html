@@ -1,0 +1,57 @@
+<div class="game-container game5-layout">
+    <div class="game-header">
+        <h2 class="text-neon-cyan">Tómbola de la Suerte</h2>
+        <p class="game-description">
+            ¿La suerte mejora con más intentos? Cada tiro en esta tómbola tiene exactamente un 
+            <strong>5% de probabilidad</strong> de premio. ¡Independencia pura!
+        </p>
+    </div>
+
+    <div class="game-main-content">
+        <!-- Visual de la Tómbola -->
+        <div class="tombola-visual glass-panel">
+            <div id="tombola-sphere" class="tombola-sphere">
+                <!-- Se puede animar con CSS -->
+                <div class="prize-ball">🎁</div>
+                <div class="loose-ball">✖</div>
+                <div class="loose-ball">✖</div>
+            </div>
+            <div class="spin-cost-tag">Costo: 10 Fichas</div>
+            <button id="btn-spin-tombola" class="glass-btn primary-btn large-btn">Tirar de la Tómbola</button>
+            <div class="auto-controls" style="width: 80%; margin-top: 10px; display: flex; gap: 10px;">
+                <button id="btn-auto-spin" class="glass-btn secondary-btn" style="flex: 1; text-align: center;">Modo Auto</button>
+                <button id="btn-stop-auto" class="glass-btn secondary-btn text-neon-red" style="flex: 1; text-align: center; display: none;">Detener</button>
+            </div>
+            <button id="btn-reset-tombola" class="glass-btn secondary-btn" style="margin-top: 15px; width: 80%; display: none;">Reiniciar Tómbola</button>
+        </div>
+
+        <!-- Barra de Progreso / Termómetro -->
+        <div class="progress-section glass-panel">
+            <h4 class="text-neon-blue">Intentos Realizados</h4>
+            <div class="thermometer-container">
+                <div id="thermometer-fill" class="thermometer-fill"></div>
+                <span id="attempt-count" class="attempt-number">0</span>
+            </div>
+            <p class="stat-label">Tu suerte no se acumula, pero tus intentos sí.</p>
+        </div>
+    </div>
+
+    <!-- Área de Registro (Log) -->
+    <div class="log-container glass-panel">
+        <h4 class="text-neon-blue">Registro de Tiros</h4>
+        <div id="spin-log" class="spin-log">
+            <!-- Los tiros se añadirán aquí -->
+            <p class="empty-log">Aún no has tirado de la tómbola...</p>
+        </div>
+    </div>
+
+    <!-- Modal Educativo (Oculto) -->
+    <div id="game-conclusion" class="modal-overlay hidden">
+        <div class="glass-panel modal-content education-modal">
+            <span id="conclusion-emoji" class="modal-emoji">🎁</span>
+            <h2 id="conclusion-title" class="text-neon-cyan">¡Felicidades!</h2>
+            <p id="conclusion-text" class="conclusion-message"></p>
+            <button id="btn-close-conclusion" class="glass-btn primary-btn" style="width: 100%;">Entendido</button>
+        </div>
+    </div>
+</div>

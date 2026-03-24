@@ -1,0 +1,176 @@
+/**
+ * =========================================
+ * CSS JUEGO 7: PERCEPCIÓN DE PATRONES
+ * =========================================
+ */
+
+.game7-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+}
+
+.game-main-content {
+    display: flex;
+    gap: 30px;
+}
+
+/* Panel de Predicción */
+.prediction-panel {
+    flex: 1;
+    padding: 25px;
+    text-align: center;
+}
+
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 25px 0;
+}
+
+.number-btn {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.number-btn:hover {
+    background: rgba(0, 210, 255, 0.1);
+    border-color: #00d2ff;
+    transform: scale(1.05);
+}
+
+.number-btn.selected {
+    background: rgba(0, 210, 255, 0.3);
+    border-color: #00d2ff;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    transform: scale(1.1);
+}
+
+.bet-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.cost-info {
+    font-size: 0.9rem;
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.05);
+    padding: 4px 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+/* Stats Dashboard */
+.stats-dashboard {
+    flex: 1;
+    padding: 25px;
+}
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.dash-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+}
+
+.dash-card .label { font-size: 0.75rem; color: #aaa; margin-bottom: 5px; text-align: center; }
+.dash-card .value { font-size: 1.5rem; }
+
+.history-section { margin-top: 25px; }
+.history-section h5 { color: #888; margin-bottom: 10px; }
+
+.history-bubbles {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-bubble {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: popIn 0.3s ease-out;
+}
+
+/* Histograma */
+.frequency-viz {
+    padding: 25px;
+}
+
+.histogram-grid {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    height: 150px;
+    margin: 30px 0 10px 0;
+    padding: 0 20px;
+}
+
+.hist-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.hist-bar {
+    width: 100%;
+    background: linear-gradient(to top, #00d2ff, #8a2be2);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.5s ease;
+    position: relative;
+}
+
+.hist-bar::after {
+    content: attr(data-count);
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: #00d2ff;
+}
+
+.hist-label { font-size: 0.8rem; font-weight: bold; color: #eee; }
+
+.edu-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}

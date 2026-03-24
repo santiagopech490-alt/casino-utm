@@ -1,0 +1,163 @@
+/**
+ * =========================================
+ * CSS JUEGO 6: GACHA CARD SIMULATOR
+ * =========================================
+ */
+
+.game6-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+}
+
+.text-neon-gold { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+.text-neon-purple { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
+
+/* Dashboard */
+.gacha-dashboard {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    text-align: center;
+}
+
+.dash-item { display: flex; flex-direction: column; gap: 5px; }
+.dash-label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
+.dash-value { font-size: 1.8rem; }
+
+/* Shop Section */
+.gacha-shop-section {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.shop-card {
+    flex: 1;
+    max-width: 300px;
+    padding: 25px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.shop-card:hover { transform: translateY(-5px); }
+.shop-card.featured { border-color: #a855f7; background: rgba(168, 85, 247, 0.05); }
+
+.promo-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #ff4d4d;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4);
+}
+
+.price-tag {
+    font-size: 1.4rem;
+    color: #00ff88;
+    margin: 15px 0;
+    font-weight: bold;
+}
+
+/* Gacha Grid */
+.gacha-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 140px);
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+    min-height: 300px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-style: italic;
+}
+
+/* Card Styling */
+.gacha-card {
+    width: 140px;
+    height: 200px;
+    perspective: 1000px;
+    animation: flipIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #1e293b;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-rarity-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.card-icon { font-size: 3rem; margin: 15px 0; }
+.card-roll { font-size: 0.8rem; color: #64748b; font-family: monospace; }
+
+/* Rarity Colors */
+.card-L .card-inner { border-color: #f59e0b; background: linear-gradient(135deg, #451a03, #1e293b); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); animation: legendaryGlow 2s infinite alternate; }
+.card-L .card-rarity-label { color: #f59e0b; }
+
+.card-E .card-inner { border-color: #a855f7; background: linear-gradient(135deg, #2e1065, #1e293b); }
+.card-E .card-rarity-label { color: #a855f7; }
+
+.card-R .card-inner { border-color: #3b82f6; background: linear-gradient(135deg, #172554, #1e293b); }
+.card-R .card-rarity-label { color: #3b82f6; }
+
+.card-C .card-inner { border-color: #94a3b8; }
+.card-C .card-rarity-label { color: #94a3b8; }
+
+@keyframes flipIn {
+    from { transform: rotateY(90deg); opacity: 0; }
+    to { transform: rotateY(0deg); opacity: 1; }
+}
+
+@keyframes legendaryGlow {
+    from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+    to { box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); }
+}
+
+/* Education Modal */
+.edu-stats-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    text-align: left;
+    font-family: 'Consolas', monospace;
+    line-height: 1.6;
+}
+
+.stat-line { margin-bottom: 10px; display: block; }
+.stat-line strong { color: #00ff88; }
+
+.edu-lesson {
+    color: #cbd5e1;
+    font-style: italic;
+    margin-bottom: 25px;
+}

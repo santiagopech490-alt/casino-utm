@@ -1,0 +1,232 @@
+/**
+ * =========================================
+ * CSS JUEGO 4: CONTAGIO DINÁMICO (OPTIMIZADO)
+ * =========================================
+ */
+
+.game4-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.epidemic-grid {
+    width: 500px;
+    height: 450px;
+    position: relative;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+}
+
+.persona {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+.node-label {
+    position: absolute;
+    top: -18px;
+    font-size: 0.65rem;
+    color: #eee;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 1px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 0 3px rgba(0,0,0,1);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.persona::after {
+    content: '';
+    width: 30%;
+    height: 30%;
+    background: currentColor;
+    border-radius: 50%;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.persona.sana {
+    color: #00d2ff;
+    background: rgba(0, 210, 255, 0.2);
+    border-color: rgba(0, 210, 255, 0.4);
+}
+
+.persona.contagiada {
+    color: #ff3232;
+    background: rgba(255, 50, 50, 0.3);
+    border-color: #ff3232;
+    box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
+    animation: pulse-red 1.5s infinite ease-in-out;
+}
+
+.persona.seleccionada {
+    color: #ffd700;
+    border-color: #ffd700;
+    box-shadow: 0 0 20px #ffd700;
+    background: rgba(255, 215, 0, 0.3);
+    z-index: 20;
+}
+
+@keyframes pulse-red {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.game-board-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.game-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 280px;
+}
+
+.control-panel, .legend {
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.control-panel h4, .legend h4 {
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.stat-item {
+    margin-bottom: 15px;
+}
+
+.stat-item label {
+    display: block;
+    color: #aaa;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+input[type="range"] {
+    flex: 1;
+}
+
+.number-input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+    outline: none;
+}
+
+.primary-btn {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 12px; /* Mayor separación entre botones */
+    padding: 15px !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.secondary-btn {
+    text-align: center;
+    width: 100%;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.legend-item .persona {
+    width: 24px;
+    height: 24px;
+    cursor: default;
+}
+
+.legend-item .persona::after {
+    display: none;
+}
+
+/* --- Panel de Conclusión / Resultados --- */
+.conclusion-panel {
+    margin-top: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-left: 5px solid transparent;
+    transition: all 0.4s ease;
+    min-height: 80px;
+    box-sizing: border-box;
+    overflow: hidden; /* Evita desbordamiento */
+}
+
+#conclusion-text {
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word; /* Rompe palabras largas si es necesario */
+    flex: 1;
+}
+
+.conclusion-panel.success {
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+.conclusion-panel.error {
+    border-color: #ff3232;
+    background: rgba(255, 50, 50, 0.1);
+    color: #ff3232;
+    box-shadow: 0 0 20px rgba(255, 50, 50, 0.1);
+}
+
+.conclusion-panel.final {
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+}
+
+.conclusion-emoji {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.hidden {
+    display: none !important;
+}

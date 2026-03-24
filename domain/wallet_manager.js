@@ -15,8 +15,20 @@ export const addChips = (amount) => {
 };
 
 export const subtractChips = (amount) => {
+    if (balance < amount) {
+        showError("Fichas insuficientes", `Necesitas ${amount} fichas, pero solo tienes ${balance}.`);
+        return false;
+    }
     balance -= amount;
     updateUI();
+    return true;
+};
+
+export const hasEnoughChips = (amount) => {
+    if (balance < amount) {
+        showError("Fichas insuficientes", `Necesitas ${amount} fichas para esta apuesta.`);
+        return false;
+    }
     return true;
 };
 
@@ -73,15 +85,30 @@ export const initWalletUI = () => {
         const amount = parseInt(inputAmount.value);
         if (isNaN(amount) || amount <= 0) return;
 
-        subtractChips(amount);
-        modal.classList.remove('active');
-        showConfirmation('withdraw', amount);
+        if (subtractChips(amount)) {
+            modal.classList.remove('active');
+            showConfirmation('withdraw', amount);
+        }
     };
 
     // Cerrar confirmación
     document.getElementById('btn-confirm-ok').onclick = () => {
         confirmModal.classList.remove('active');
     };
+};
+
+export const showError = (title, message) => {
+    const confirmModal = document.getElementById('confirm-modal');
+    const emoji = document.getElementById('confirm-emoji');
+    const titleEl = document.getElementById('confirm-title');
+    const text = document.getElementById('confirm-text');
+
+    emoji.textContent = '⚠️';
+    titleEl.textContent = title;
+    titleEl.className = 'text-neon-red';
+    text.innerHTML = message;
+
+    confirmModal.classList.add('active');
 };
 
 const showConfirmation = (type, amount) => {

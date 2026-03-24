@@ -1,11 +1,13 @@
 import * as ProbEngine from '../../domain/probability_engine.js';
+import * as Wallet from '../../domain/wallet_manager.js';
 
 let gameState = { 
     history: [], 
     userCurrentChoice: null, 
     userHits: 0, 
     userMisses: 0, 
-    isAnimating: false 
+    isAnimating: false,
+    betAmount: 10
 };
 
 let ui = {};
@@ -74,13 +76,27 @@ const selectChoice = (choice) => {
 
 const handleSingleFlip = async () => {
     if (gameState.isAnimating || !gameState.userCurrentChoice) return;
+
+    // Validación de economía
+    if (!Wallet.hasEnoughChips(gameState.betAmount)) {
+        return;
+    }
+
     gameState.isAnimating = true;
     ui.btnFlip1.disabled = true;
     ui.btnFlip20.disabled = true;
+
     const result = ProbEngine.flipCoinPure();
     gameState.history.push(result);
-    if (result === gameState.userCurrentChoice) gameState.userHits++;
-    else gameState.userMisses++;
+
+    if (result === gameState.userCurrentChoice) {
+        gameState.userHits++;
+        Wallet.addChips(gameState.betAmount); // Gana el doble (devuelve apuesta + premio)
+    } else {
+        gameState.userMisses++;
+        Wallet.subtractChips(gameState.betAmount);
+    }
+
     await animateCoin(result);
     updateUI();
     gameState.isAnimating = false;
@@ -126,10 +142,11 @@ const updateUI = () => {
         ui.conclusion.classList.add('animate-slide-up');
         ui.conclusionText.innerHTML = `Tras <strong>${stats.total}</strong> lanzamientos... cada tiro es una probabilidad <strong>independiente de 50/50</strong>.`;
     }
+    Wallet.updateUI();
 };
 
 export const resetGame = () => {
-    gameState = { history: [], userCurrentChoice: null, userHits: 0, userMisses: 0, isAnimating: false };
+    gameState = { history: [], userCurrentChoice: null, userHits: 0, userMisses: 0, isAnimating: false, betAmount: 10 };
     if (ui.conclusion) ui.conclusion.classList.add('hidden');
     if (ui.btnFlip1) ui.btnFlip1.disabled = true;
     updateUI();

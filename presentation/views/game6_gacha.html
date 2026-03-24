@@ -1,0 +1,62 @@
+<div class="game-container game6-layout">
+    <!-- Dashboard en tiempo real -->
+    <header class="gacha-dashboard glass-panel">
+        <div class="dash-item">
+            <span class="dash-label">Intentos Totales</span>
+            <strong id="stat-total-rolls" class="dash-value">0</strong>
+        </div>
+        <div class="dash-item">
+            <span class="dash-label">Legendarias</span>
+            <strong id="stat-legendaries" class="dash-value text-neon-gold">0</strong>
+        </div>
+        <div class="dash-item">
+            <span class="dash-label">Racha sin Suerte</span>
+            <strong id="stat-dry-streak" class="dash-value text-neon-red">0</strong>
+        </div>
+        <div class="dash-item">
+            <span class="dash-label">E (Esperadas)</span>
+            <strong id="stat-expected" class="dash-value text-neon-blue">0.00</strong>
+        </div>
+    </header>
+
+    <div class="gacha-shop-section">
+        <div class="shop-card glass-panel">
+            <h3>Pack Básico</h3>
+            <p>10 Cartas Aleatorias</p>
+            <div class="price-tag">160 Fichas</div>
+            <button id="btn-buy-10" class="glass-btn primary-btn">Abrir 10</button>
+        </div>
+
+        <div class="shop-card glass-panel featured">
+            <div class="promo-badge">¡DESCUENTO!</div>
+            <h3>Pack Maestro</h3>
+            <p>100 Cartas Aleatorias</p>
+            <div class="price-tag">1400 Fichas</div>
+            <button id="btn-buy-100" class="glass-btn primary-btn">Abrir 100</button>
+        </div>
+    </div>
+
+    <!-- Contenedor de cartas -->
+    <section id="gacha-display-area" class="gacha-grid">
+        <!-- Las cartas aparecerán aquí dinámicamente -->
+        <div class="empty-state">
+            <p>Selecciona un mazo para comenzar la apertura...</p>
+        </div>
+    </section>
+
+    <!-- Modal Educativo: Módulo de Realidad Estadística -->
+    <div id="education-modal" class="modal-overlay hidden">
+        <div class="glass-panel modal-content education-content">
+            <span class="modal-emoji">📊</span>
+            <h2 class="text-neon-purple">Realidad Estadística</h2>
+            <div id="education-stats" class="edu-stats-box">
+                <!-- Contenido dinámico -->
+            </div>
+            <p class="edu-lesson">
+                Recuerda: El azar no tiene memoria. Cada carta tiene un 5% de ser legendaria, 
+                independientemente de cuántas veces hayas fallado antes.
+            </p>
+            <button id="btn-close-edu" class="glass-btn primary-btn" style="width: 100%;">Entendido</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+<div class="game-container game8-layout">
+    <div class="game-header">
+        <h2 class="text-neon-pink">La Ilusión de la Precisión</h2>
+        <p class="game-description">
+            ¿Si casi ganas, significa que estás cerca? Descubre la falacia del <strong>"Near-miss"</strong> 
+            en las máquinas tragamonedas. Cada giro es 100% independiente.
+        </p>
+    </div>
+
+    <div class="slot-machine-container glass-panel">
+        <div class="slot-machine-frame">
+            <div class="reels-container">
+                <div id="reel-1" class="reel glass-panel-dark">
+                    <div class="reel-symbols">7️⃣</div>
+                </div>
+                <div id="reel-2" class="reel glass-panel-dark">
+                    <div class="reel-symbols">⭐</div>
+                </div>
+                <div id="reel-3" class="reel glass-panel-dark">
+                    <div class="reel-symbols">🍒</div>
+                </div>
+            </div>
+            
+            <div class="paytable-mini">
+                <span class="pay-item">7️⃣7️⃣7️⃣: 100</span>
+                <span class="pay-item">⭐⭐⭐: 1000</span>
+                <span class="pay-item">🔔🔔🔔: 25</span>
+                <span class="pay-item">🍒🍒🍒: 15</span>
+            </div>
+        </div>
+
+        <div class="machine-controls">
+            <div class="cost-tag">Costo: 50 Fichas</div>
+            <button id="btn-spin-slots" class="glass-btn primary-btn large-btn btn-neon-green">GIRAR</button>
+        </div>
+    </div>
+
+    <!-- Panel de Feedback Educativo -->
+    <div id="slot-feedback" class="feedback-panel glass-panel hidden">
+        <div class="feedback-content">
+            <span id="feedback-icon">💡</span>
+            <p id="feedback-message"></p>
+        </div>
+    </div>
+
+    <!-- Modal de Bancarrota Educativa -->
+    <div id="slot-bankruptcy-modal" class="modal-overlay hidden">
+        <div class="glass-panel modal-content education-modal">
+            <span class="modal-emoji">📉</span>
+            <h2 class="text-neon-red">Sin Fichas</h2>
+            <div class="edu-text">
+                <p>Las máquinas tragamonedas están diseñadas para usar el <strong>"Casi-acierto" (Near-miss)</strong> para mantenerte jugando.</p>
+                <p>Ver dos símbolos iguales te hace creer que la máquina está "a punto de pagar", pero matemáticamente, el tercer rodillo no sabe qué salió en los dos anteriores.</p>
+            </div>
+            <button id="btn-slot-reset" class="glass-btn primary-btn" style="width: 100%;">Reiniciar Sesión</button>
+        </div>
+    </div>
+</div>

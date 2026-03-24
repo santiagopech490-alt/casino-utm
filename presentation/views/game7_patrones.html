@@ -1,0 +1,79 @@
+<div class="game-container game7-layout">
+    <div class="game-header">
+        <h2 class="text-neon-blue">¿Qué número saldrá?</h2>
+        <p class="game-description">
+            Intenta predecir el siguiente número del 1 al 10. Desmitifica la creencia de que existen 
+            patrones en el azar puro. ¡La ruleta no tiene memoria!
+        </p>
+    </div>
+
+    <div class="game-main-content">
+        <!-- Panel de Predicción -->
+        <div class="prediction-panel glass-panel">
+            <h4 class="text-neon-blue">Elige tu número</h4>
+            <div class="number-grid">
+                <!-- Botones 1-10 -->
+                <button class="number-btn" data-num="1">1</button>
+                <button class="number-btn" data-num="2">2</button>
+                <button class="number-btn" data-num="3">3</button>
+                <button class="number-btn" data-num="4">4</button>
+                <button class="number-btn" data-num="5">5</button>
+                <button class="number-btn" data-num="6">6</button>
+                <button class="number-btn" data-num="7">7</button>
+                <button class="number-btn" data-num="8">8</button>
+                <button class="number-btn" data-num="9">9</button>
+                <button class="number-btn" data-num="10">10</button>
+            </div>
+            
+            <div class="bet-controls">
+                <div class="cost-info">Costo: 10 Fichas</div>
+                <button id="btn-spin-prediction" class="glass-btn primary-btn" disabled>Girar Ruleta</button>
+            </div>
+        </div>
+
+        <!-- Dashboard de Estado -->
+        <div class="stats-dashboard glass-panel">
+            <h4 class="text-neon-blue">Estadísticas de Sesión</h4>
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <span class="label">Aciertos (✅)</span>
+                    <strong id="stat-hits" class="value text-neon-green">0</strong>
+                </div>
+                <div class="dash-card">
+                    <span class="label">Errores (❌)</span>
+                    <strong id="stat-misses" class="value text-neon-red">0</strong>
+                </div>
+                <div class="dash-card">
+                    <span class="label">Racha Actual</span>
+                    <strong id="stat-streak" class="value">0</strong>
+                </div>
+            </div>
+            
+            <div class="history-section">
+                <h5>Últimos 10 resultados:</h5>
+                <div id="result-history" class="history-bubbles">
+                    <!-- Bubbles con números -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualizador de Frecuencia (Histograma) -->
+    <div class="frequency-viz glass-panel">
+        <h4 class="text-neon-blue">Histograma de Frecuencia Relativa</h4>
+        <div id="histogram-container" class="histogram-grid">
+            <!-- Barras generadas por JS -->
+        </div>
+        <p class="edu-note">A largo plazo, todas las barras tenderán a tener la misma altura (Ley de los Grandes Números).</p>
+    </div>
+
+    <!-- Modal Educativo Intermitente -->
+    <div id="pattern-education-modal" class="modal-overlay hidden">
+        <div class="glass-panel modal-content">
+            <span class="modal-emoji">🧠</span>
+            <h2 class="text-neon-blue">Ilusión de Patrón</h2>
+            <p id="edu-content" class="edu-message"></p>
+            <button id="btn-close-pattern-edu" class="glass-btn primary-btn" style="width: 100%;">Continuar</button>
+        </div>
+    </div>
+</div>

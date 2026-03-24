@@ -39,7 +39,6 @@ const cacheDOM = () => {
         betRange: container.querySelector('#bet-range'),
         betDisplay: container.querySelector('#bet-display'),
         btnSpin: container.querySelector('#btn-spin'),
-        btnWithdraw: container.querySelector('#btn-withdraw'),
         statChips: container.querySelector('#stat-chips'),
         statRounds: container.querySelector('#stat-rounds'),
         statLastPayout: container.querySelector('#stat-last-payout'),
@@ -70,7 +69,6 @@ const bindEvents = () => {
     });
 
     ui.btnSpin.onclick = handleSpin;
-    ui.btnWithdraw.onclick = handleWithdraw;
     ui.btnRestart.onclick = resetGameState;
 };
 
@@ -87,15 +85,12 @@ const handleSpin = async () => {
     if (gameState.isAnimating || gameState.gameOver) return;
 
     // Validar contra el Wallet global
-    const validation = Rules.validateBet(Wallet.getBalance(), gameState.currentBet);
-    if (!validation.valid) {
-        alert(validation.message);
+    if (!Wallet.hasEnoughChips(gameState.currentBet)) {
         return;
     }
 
     gameState.isAnimating = true;
     ui.btnSpin.disabled = true;
-    ui.btnWithdraw.disabled = true;
 
     // Restar apuesta del Wallet Global
     Wallet.subtractChips(gameState.currentBet);
@@ -134,12 +129,6 @@ const handleSpin = async () => {
 
     gameState.isAnimating = false;
     ui.btnSpin.disabled = false;
-    ui.btnWithdraw.disabled = false;
-};
-
-const handleWithdraw = () => {
-    if (gameState.isAnimating) return;
-    showConclusion(false);
 };
 
 const animateWheel = (result) => {
@@ -209,7 +198,6 @@ const resetGameState = () => {
     
     ui.conclusion.classList.add('hidden');
     ui.btnSpin.disabled = true;
-    ui.btnWithdraw.disabled = false;
     ui.resultNumber.textContent = "--";
     ui.resultColorText.textContent = "LISTO PARA GIRAR";
     ui.resultColorText.className = "";

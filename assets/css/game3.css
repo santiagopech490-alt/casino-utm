@@ -1,0 +1,200 @@
+/* =========================================
+   GAME 3 - DISEÑO INTERACTIVO
+   ========================================= */
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+}
+
+.mini-card {
+    aspect-ratio: 2/3;
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgba(255, 215, 0, 0.5);
+    user-select: none;
+}
+
+.mini-card:hover {
+    transform: translateY(-5px) scale(1.05);
+    border-color: rgba(255, 215, 0, 0.7);
+}
+
+.mini-card.selected {
+    transform: translateY(-5px) scale(1.1);
+    background: #1a1a1a;
+    border-color: #ffd700;
+    color: #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.mini-card.used {
+    background: #111;
+    color: #444;
+    cursor: not-allowed;
+    pointer-events: none;
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.mini-card.used:hover {
+    transform: none;
+}
+
+
+/* El previsualizador de resultado que se voltea */
+.card-reveal-container {
+    perspective: 1000px;
+    width: 100%;
+    aspect-ratio: 2/3;
+    min-height: 180px;
+}
+
+.card-reveal-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.card-reveal-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-back {
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    font-size: 4rem;
+    color: rgba(255,255,255,0.2);
+}
+
+.card-front {
+    background: #1a1a1a;
+    transform: rotateY(180deg);
+    font-size: 4rem;
+    font-weight: bold;
+}
+
+.card-front.win {
+    color: #00ff88;
+    border-color: #00ff88;
+}
+
+.card-front.loss {
+    color: #ff4d4d;
+    border-color: #ff4d4d;
+}
+
+.bet-amount-selector .amount-selector {
+    justify-content: center;
+}
+
+.bet-amount-selector .chip-number-input,
+.selection-box .chip-number-input {
+    width: 100%;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.bet-amount-selector .step-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.hotbar-container {
+    height: 120px;
+}
+
+.history-hotbar {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: auto;
+    height: 100%;
+}
+
+.hotbar-card {
+    flex-shrink: 0;
+    width: 60px;
+    height: 90px;
+    background: #2a2a2a;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: card-add-animation 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes card-add-animation {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.hotbar-card.win {
+    border-color: #00ff88;
+    color: #00ff88;
+}
+
+.hotbar-card.loss {
+    border-color: #ff4d4d;
+    color: #ff4d4d;
+    opacity: 0.7;
+}
+
+/* Victory Modal Styles */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    padding: 30px;
+    text-align: center;
+}
+
+.modal-content p {
+    margin: 15px 0;
+    font-size: 1.2rem;
+    color: #ccc;
+}
+
+.modal-content strong {
+    color: #00ff88;
+}

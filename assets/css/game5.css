@@ -1,0 +1,191 @@
+/**
+ * =========================================
+ * CSS JUEGO 5: TÓMBOLA DE LA SUERTE
+ * =========================================
+ */
+
+.game5-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.text-neon-cyan { color: #00e5ff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
+
+.game-main-content {
+    display: flex;
+    gap: 30px;
+    align-items: stretch;
+}
+
+/* Visual de la Tómbola */
+.tombola-visual {
+    flex: 1.5;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tombola-sphere {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 3px solid rgba(0, 229, 255, 0.4);
+    background: radial-gradient(circle at 30% 30%, rgba(0, 229, 255, 0.1), transparent);
+    position: relative;
+    margin-bottom: 30px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.1), inset 0 0 20px rgba(0, 229, 255, 0.1);
+}
+
+.tombola-sphere.spinning {
+    animation: shake-sphere 0.5s infinite;
+}
+
+.prize-ball, .loose-ball {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    animation: move-balls 4s infinite linear;
+}
+
+.prize-ball { background: rgba(255, 215, 0, 0.3); border: 1px solid gold; top: 40%; left: 30%; }
+.loose-ball:nth-child(2) { background: rgba(255, 255, 255, 0.1); border: 1px solid #666; top: 20%; left: 60%; animation-delay: -1s; }
+.loose-ball:nth-child(3) { background: rgba(255, 255, 255, 0.1); border: 1px solid #666; top: 60%; left: 50%; animation-delay: -2s; }
+
+@keyframes move-balls {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(40px, 20px) rotate(90deg); }
+    50% { transform: translate(0, 40px) rotate(180deg); }
+    75% { transform: translate(-40px, 20px) rotate(270deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+}
+
+@keyframes shake-sphere {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+}
+
+.spin-cost-tag {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.large-btn {
+    width: 80%;
+    font-weight: bold;
+    text-align: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    padding: 16px;
+    box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2);
+}
+
+/* Progreso / Termómetro */
+.progress-section {
+    flex: 1;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.thermometer-container {
+    width: 30px;
+    height: 180px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.thermometer-fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(to top, #00e5ff, #8a2be2);
+    transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+}
+
+.attempt-number {
+    position: absolute;
+    top: 50%;
+    left: 45px;
+    transform: translateY(-50%);
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #00e5ff;
+}
+
+/* Área de Registro (Log) */
+.log-container {
+    padding: 20px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.spin-log {
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+}
+
+.log-entry {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    animation: fade-in 0.3s ease-out;
+}
+
+.log-entry.ganador { color: #ffd700; font-weight: bold; }
+.log-entry.perdedor { color: #888; }
+
+.empty-log {
+    color: #555;
+    font-style: italic;
+    text-align: center;
+    margin-top: 30px;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.education-modal {
+    max-width: 450px;
+}
+
+.conclusion-message {
+    line-height: 1.6;
+    margin: 20px 0;
+    color: #ccc;
+    font-size: 1.05rem;
+}

@@ -26,6 +26,48 @@ const ROUTES = {
         controller: './controllers/game2_controller.js',
         css: 'assets/css/game2.css',
         init: 'initGame2'
+    },
+    game3: {
+        title: 'La carta que nunca sale',
+        view: 'presentation/views/game3_cartas.html',
+        controller: './controllers/game3_controller.js',
+        css: 'assets/css/game3.css',
+        init: 'initGame3'
+    },
+    game4: {
+        title: 'Contagio en el Salón',
+        view: 'presentation/views/game4_contagio.html',
+        controller: './controllers/game4_controller.js',
+        css: 'assets/css/game4.css',
+        init: 'initGame4'
+    },
+    game5: {
+        title: 'Tómbola de la Suerte',
+        view: 'presentation/views/game5_tombola.html',
+        controller: './controllers/game5_controller.js',
+        css: 'assets/css/game5.css',
+        init: 'initGame5'
+    },
+    game6: {
+        title: 'Gacha Card Simulator',
+        view: 'presentation/views/game6_gacha.html',
+        controller: './controllers/game6_controller.js',
+        css: 'assets/css/game6.css',
+        init: 'initGame6'
+    },
+    game7: {
+        title: 'Percepción de Patrones',
+        view: 'presentation/views/game7_patrones.html',
+        controller: './controllers/game7_controller.js',
+        css: 'assets/css/game7.css',
+        init: 'initGame7'
+    },
+    game8: {
+        title: 'La Ilusión de la Precisión',
+        view: 'presentation/views/game8_slots.html',
+        controller: './controllers/game8_controller.js',
+        css: 'assets/css/game8.css',
+        init: 'initGame8'
     }
     };
 
