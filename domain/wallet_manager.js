@@ -1,32 +1,42 @@
+import * as Repository from '../data/json_repository.js';
+import { playSound } from './sound_manager.js';
+
 /**
  * =========================================
- * WALLET MANAGER - Gestión de Fichas Global
+ * WALLET MANAGER - Gestión de Fichas con Persistencia
  * =========================================
  */
 
-let balance = 1000;
-
-export const getBalance = () => balance;
+export const getBalance = () => {
+    const data = Repository.loadData();
+    return data.wallet_balance;
+};
 
 export const addChips = (amount) => {
-    balance += amount;
+    const currentBalance = getBalance();
+    const newBalance = currentBalance + amount;
+    Repository.updateState({ wallet_balance: newBalance });
     updateUI();
-    return balance;
+    return newBalance;
 };
 
 export const subtractChips = (amount) => {
-    if (balance < amount) {
-        showError("Fichas insuficientes", `Necesitas ${amount} fichas, pero solo tienes ${balance}.`);
+    const currentBalance = getBalance();
+    const limit = -1000;
+    
+    if (currentBalance - amount < limit) {
+        showError("Límite de crédito excedido", `Tu saldo no puede ser inferior a ${limit} fichas. Por favor, recarga para seguir jugando.`);
         return false;
     }
-    balance -= amount;
+    const newBalance = currentBalance - amount;
+    Repository.updateState({ wallet_balance: newBalance });
     updateUI();
     return true;
 };
 
 export const hasEnoughChips = (amount) => {
-    if (balance < amount) {
-        showError("Fichas insuficientes", `Necesitas ${amount} fichas para esta apuesta.`);
+    if (getBalance() - amount < -1000) {
+        showError("Crédito Insuficiente", `Esta apuesta excedería tu límite de crédito de -1000 fichas.`);
         return false;
     }
     return true;
@@ -35,8 +45,11 @@ export const hasEnoughChips = (amount) => {
 export const updateUI = () => {
     const walletDisplay = document.getElementById('wallet-balance');
     if (walletDisplay) {
+        const balance = getBalance();
         walletDisplay.textContent = balance;
+        // El saldo se pone rojo si es negativo
         walletDisplay.classList.toggle('text-neon-red', balance < 0);
+        walletDisplay.style.textShadow = balance < 0 ? '0 0 10px rgba(255, 0, 0, 0.5)' : '';
     }
 };
 
@@ -52,46 +65,51 @@ export const initWalletUI = () => {
     
     if (!modal || !btnOpen) return;
 
-    // Abrir modal
     btnOpen.onclick = () => {
         modal.classList.add('active');
-        inputAmount.value = 100;
+        inputAmount.value = 500;
     };
 
-    // Cerrar modal
     btnClose.onclick = () => modal.classList.remove('active');
 
-    // Botones +/- 5
-    document.getElementById('btn-plus-5').onclick = () => {
-        inputAmount.value = parseInt(inputAmount.value) + 5;
-    };
-    document.getElementById('btn-minus-5').onclick = () => {
-        const val = parseInt(inputAmount.value);
-        if (val > 5) inputAmount.value = val - 5;
+    // Nuevos incrementos para recarga rápida
+    const setupStep = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.onclick = (e) => {
+                e.preventDefault();
+                const current = parseInt(inputAmount.value) || 0;
+                inputAmount.value = Math.max(0, current + val);
+                playSound('click'); // Feedback de sonido
+            };
+        }
     };
 
-    // Accion: Aumentar
-    document.getElementById('btn-action-add').onclick = () => {
+    setupStep('btn-plus-5', 100);   // +100
+    setupStep('btn-minus-5', -100); // -100
+    setupStep('btn-plus-500', 500); // +500
+    setupStep('btn-minus-500', -500); // -500
+
+    const addAction = document.getElementById('btn-action-add');
+    if (addAction) addAction.onclick = () => {
         const amount = parseInt(inputAmount.value);
         if (isNaN(amount) || amount <= 0) return;
-        
         addChips(amount);
         modal.classList.remove('active');
         showConfirmation('deposit', amount);
+        playSound('chip_bet');
     };
 
-    // Accion: Remover
-    document.getElementById('btn-action-remove').onclick = () => {
+    const removeAction = document.getElementById('btn-action-remove');
+    if (removeAction) removeAction.onclick = () => {
         const amount = parseInt(inputAmount.value);
         if (isNaN(amount) || amount <= 0) return;
-
         if (subtractChips(amount)) {
             modal.classList.remove('active');
             showConfirmation('withdraw', amount);
         }
     };
 
-    // Cerrar confirmación
     document.getElementById('btn-confirm-ok').onclick = () => {
         confirmModal.classList.remove('active');
     };
@@ -107,7 +125,6 @@ export const showError = (title, message) => {
     titleEl.textContent = title;
     titleEl.className = 'text-neon-red';
     text.innerHTML = message;
-
     confirmModal.classList.add('active');
 };
 
@@ -128,12 +145,5 @@ const showConfirmation = (type, amount) => {
         title.className = 'text-neon-red';
         text.innerHTML = `Se han retirado <strong>${amount}</strong> fichas. <br>Tu nuevo saldo se ha actualizado.`;
     }
-
     confirmModal.classList.add('active');
 };
-
-// Auto-inicializar al cargar
-document.addEventListener('DOMContentLoaded', () => {
-    updateUI();
-    initWalletUI();
-});

@@ -11,6 +11,7 @@
 ## 2. Definición del Juego
 - **Nombre:** "Tómbola de la Suerte" (o "¿La suerte mejora con más intentos?")
 - **Mito a desmentir:** "Si intento muchas veces, seguro lo logro."
+- **Explicación del Mito:** Este mito se rompió al demostrar que en eventos con **Probabilidad Fija e Independiente**, la probabilidad de éxito no se acumula. Cada tiro de la tómbola tiene exactamente la misma probabilidad (5%), sin importar cuántas veces hayas fallado antes. Intentar más veces aumenta las oportunidades totales de la sesión, pero no mejora la probabilidad de éxito de cada intento individual.
 - **Conceptos Clave:** Eventos independientes, Probabilidad repetida y Frecuencia esperada.
 
 ## 3. Requisitos de Lógica (`domain/tombola_engine.js`)
@@ -23,7 +24,9 @@
 - **Retorno de Datos**: Tras cada tiro, el motor debe devolver un objeto `{ intentoActual, resultado: 'ganador' | 'perdedor', probabilidadAplicada: 0.05 }`.
 
 ## 4. Requisitos de UI (`presentation/controllers/game5_controller.js`)
-- **Interacción Principal**:
+- **Cabecera**: Título del juego y el mito: *"Si intento muchas veces, seguro lo logro."*. Justo debajo, la breve explicación de cómo se rompió este mito mediante la demostración de la independencia de eventos y la probabilidad fija.
+- **Interacción Principal**: 
+
   1. El usuario visualiza la Tómbola y el costo fijo por tiro (10 fichas).
   2. **Modo Manual**: Botón "Tirar de la Tómbola".
   3. **Modo Automático**: Botón "Modo Auto" que ejecuta tiros cada 300ms. Se detiene si el usuario pulsa "Detener", si gana, si llega a 100 intentos o si se queda sin fichas.

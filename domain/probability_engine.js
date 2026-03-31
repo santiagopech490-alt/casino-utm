@@ -1,102 +1,97 @@
-/* =========================================
-   PROBABILITY ENGINE
-   Lógica matemática pura e independiente
-   ========================================= */
+/**
+ * =========================================
+ * PROBABILITY ENGINE - Lógica Matemática
+ * =========================================
+ * Este motor gestiona la generación de eventos aleatorios
+ * independientes para demostrar la Falacia del Jugador.
+ */
 
 /**
- * Función: Simula el lanzamiento de una moneda justa (50/50).
- * @returns {string} 'cara' o 'cruz'.
+ * Simula el lanzamiento de una moneda física.
+ * @returns {string} 'cara' o 'cruz' con P = 0.5.
  */
 export const flipCoinPure = () => {
+    // Math.random() es suficientemente uniforme para esta demostración.
     return Math.random() < 0.5 ? 'cara' : 'cruz';
 };
 
 /**
- * Función: Ejecuta una simulación masiva de lanzamientos.
- * @param {number} iterations - Número de veces a lanzar.
- * @returns {string[]} Array con los resultados.
+ * Simula una serie de lanzamientos en lote (Batch).
+ * @param {number} count Número de lanzamientos a simular.
+ * @returns {Array<string>} Historial de resultados generados.
  */
-export const simulateBatchFlips = (iterations) => {
+export const simulateBatch = (count = 20) => {
     const results = [];
-    for (let i = 0; i < iterations; i++) {
+    for (let i = 0; i < count; i++) {
         results.push(flipCoinPure());
     }
     return results;
 };
 
 /**
- * Función: Calcula estadísticas básicas sobre un set de resultados.
- * @param {string[]} history - Array de resultados.
- * @returns {object} Objeto con conteos y porcentajes.
+ * Calcula las estadísticas actuales de un historial.
+ * @param {Array<string>} history Lista de resultados ('cara'/'cruz').
+ * @returns {object} { caraCount, cruzCount, caraPct, cruzPct, total }
  */
-export const calculateCoinStats = (history) => {
+export const calculateStats = (history) => {
     const total = history.length;
-    if (total === 0) return { total: 0, caras: 0, cruces: 0, percCaras: 0, percCruces: 0 };
-    const caras = history.filter(res => res === 'cara').length;
-    const cruces = total - caras;
-    return { total, caras, cruces, percCaras: Math.round((caras / total) * 100), percCruces: Math.round((cruces / total) * 100) };
+    if (total === 0) return { caraCount: 0, cruzCount: 0, caraPct: 0, cruzPct: 0, total: 0 };
+
+    const caraCount = history.filter(r => r === 'cara').length;
+    const cruzCount = total - caraCount;
+
+    return {
+        caraCount,
+        cruzCount,
+        caraPct: ((caraCount / total) * 100).toFixed(1),
+        cruzPct: ((cruzCount / total) * 100).toFixed(1),
+        total
+    };
 };
 
 /**
- * Función: Simula el giro de una ruleta europea (37 bolsillos).
- * @returns {object} { number: 0-36, color: 'verde'|'rojo'|'negro' }
+ * Simula el giro de una ruleta europea (37 posiciones).
+ * @returns {object} { color: 'verde'|'rojo'|'negro', number: 0-36 }
  */
 export const spinRoulette = () => {
     const number = Math.floor(Math.random() * 37);
     let color = '';
+
     if (number === 0) {
         color = 'verde';
+    } else if ((number >= 1 && number <= 10) || (number >= 19 && number <= 28)) {
+        color = number % 2 === 0 ? 'negro' : 'rojo';
     } else {
-        const reds = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
-        color = reds.includes(number) ? 'rojo' : 'negro';
+        color = number % 2 === 0 ? 'rojo' : 'negro';
     }
+
     return { number, color };
 };
 
 /**
- * Función: Calcula el pago neto basado en la apuesta y el resultado.
- * @returns {number} Ganancia neta.
+ * Calcula las ganancias basadas en la apuesta.
+ * @param {number} betAmount Cantidad apostada.
+ * @param {string} betColor Color elegido por el usuario.
+ * @param {string} resultColor Color resultante del giro.
+ * @returns {number} Ganancia neta (0 si pierde, >0 si gana).
  */
 export const calculatePayout = (betAmount, betColor, resultColor) => {
-    if (betColor === resultColor) {
-        return betColor === 'verde' ? betAmount * 35 : betAmount;
-    }
-    return -betAmount;
-};
+    if (betColor !== resultColor) return 0;
 
-// --- Lógica para Juego 3: La Carta que Nunca Sale ---
-
-let streakState = { card: null, count: 0, maxStreak: 3 };
-
-/**
- * Función: Simula la extracción de una carta, con una pequeña probabilidad de entrar en "modo racha".
- * @param {number} totalCards - Número total de cartas.
- * @returns {number} Número aleatorio entre 1 y totalCards.
- */
-export const drawCardWithReplacement = (totalCards = 20) => {
-    if (streakState.count > 0 && streakState.count < streakState.maxStreak) {
-        streakState.count++;
-        return streakState.card;
+    // Rojo/Negro paga 1:1 (recuperas apuesta + ganas lo mismo)
+    if (betColor === 'rojo' || betColor === 'negro') {
+        return betAmount * 2;
     }
-    streakState.count = 0;
-    streakState.card = null;
-    const result = Math.floor(Math.random() * totalCards) + 1;
-    if (Math.random() < 0.1) {
-        streakState.card = result;
-        streakState.count = 1;
-        streakState.maxStreak = Math.random() < 0.5 ? 2 : 3;
+    // Verde paga 35:1 (ventaja de la casa clásica)
+    if (betColor === 'verde') {
+        return betAmount * 36;
     }
-    return result;
+    return 0;
 };
 
 /**
- * Función: Simula la extracción masiva de cartas.
- * @returns {number[]} Array con los resultados.
+ * Explicación de la ventaja de la casa en la ruleta.
  */
-export const drawBatchCards = (totalCards = 20, batchSize = 20) => {
-    const results = [];
-    for (let i = 0; i < batchSize; i++) {
-        results.push(Math.floor(Math.random() * totalCards) + 1); // El batch es siempre puro
-    }
-    return results;
+export const getRouletteEdgeText = () => {
+    return "La ruleta tiene 37 números. Si apuestas al Rojo, tienes 18/37 chances (48.6%). El casino tiene 19/37 (51.4%) gracias al **Cero Verde**. Esa diferencia del 2.7% es la 'ventaja de la casa' que garantiza que el casino gane siempre a largo plazo.";
 };

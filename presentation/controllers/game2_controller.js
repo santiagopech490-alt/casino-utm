@@ -1,208 +1,172 @@
-import * as ProbEngine from '../../domain/probability_engine.js';
-import * as Rules from '../../domain/game_rules.js';
+/**
+ * =========================================
+ * GAME 2 CONTROLLER - ¿PUEDES GANARLE AL CASINO?
+ * =========================================
+ */
+import * as Probability from '../../domain/probability_engine.js';
 import * as Wallet from '../../domain/wallet_manager.js';
+import * as Rules from '../../domain/game_rules.js';
+import { playSound } from '../../domain/sound_manager.js';
+import { showVictory } from '../components/victory_modal.js';
 
-let gameState = {
-    sessionProfit: 0, // Ganancia/Pérdida en la sesión actual del juego
+let state = {
     rounds: 0,
-    history: [],
-    selectedColor: null,
+    sessionBalance: 0,
     currentBet: 10,
-    isAnimating: false,
-    gameOver: false,
-    totalRotation: 0
+    selectedColor: null,
+    isSpinning: false,
+    history: [],
+    rotation: 0
 };
 
-let ui = {};
-
 export const initGame2 = () => {
-    cacheDOM();
-    if (!ui.container) return;
-    
-    bindEvents();
-    resetGameState();
+    console.log('[Game2] Inicializando...');
+    state = {
+        rounds: 0,
+        sessionBalance: 0,
+        currentBet: 10,
+        selectedColor: null,
+        isSpinning: false,
+        history: [],
+        rotation: 0
+    };
+    setupEventListeners();
     updateUI();
 };
 
-const cacheDOM = () => {
-    const container = document.querySelector('.game-container');
-    const rechargeBtn = document.getElementById('btn-recharge');
+const setupEventListeners = () => {
+    const btnSpin = document.getElementById('btn-spin');
+    const betRange = document.getElementById('bet-range');
+    const btnRestart = document.getElementById('btn-restart-game2');
 
-    if (!container) return;
-
-    ui = {
-        container,
-        rechargeBtn,
-        wheel: container.querySelector('#roulette-wheel'),
-        resultNumber: container.querySelector('#result-number'),
-        resultColorText: container.querySelector('#result-color-text'),
-        betRange: container.querySelector('#bet-range'),
-        betDisplay: container.querySelector('#bet-display'),
-        btnSpin: container.querySelector('#btn-spin'),
-        statChips: container.querySelector('#stat-chips'),
-        statRounds: container.querySelector('#stat-rounds'),
-        statLastPayout: container.querySelector('#stat-last-payout'),
-        historyContainer: container.querySelector('#history-container'),
-        conclusion: container.querySelector('#game-conclusion'),
-        conclusionText: container.querySelector('#conclusion-text'),
-        btnRestart: container.querySelector('#btn-restart-game2'),
-        colorButtons: container.querySelectorAll('.btn-bet-color')
-    };
-};
-
-const bindEvents = () => {
-    // Vincular recarga global
-    if (ui.rechargeBtn) {
-        ui.rechargeBtn.onclick = () => {
-            Wallet.addChips(500);
+    if (betRange) {
+        betRange.oninput = (e) => {
+            state.currentBet = parseInt(e.target.value);
             updateUI();
         };
     }
 
-    ui.betRange.oninput = (e) => {
-        gameState.currentBet = parseInt(e.target.value);
-        ui.betDisplay.textContent = gameState.currentBet;
+    document.querySelectorAll('.btn-bet-color').forEach(btn => {
+        btn.onclick = (e) => {
+            state.selectedColor = e.currentTarget.dataset.color;
+            document.querySelectorAll('.btn-bet-color').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            if (btnSpin) btnSpin.disabled = false;
+            playSound('click');
+        };
+    });
+
+    if (btnSpin) btnSpin.onclick = handleSpin;
+    if (btnRestart) btnRestart.onclick = () => {
+        playSound('click');
+        location.reload();
     };
-
-    ui.colorButtons.forEach(btn => {
-        btn.onclick = () => selectColor(btn.getAttribute('data-color'));
-    });
-
-    ui.btnSpin.onclick = handleSpin;
-    ui.btnRestart.onclick = resetGameState;
-};
-
-const selectColor = (color) => {
-    if (gameState.isAnimating || gameState.gameOver) return;
-    gameState.selectedColor = color;
-    ui.colorButtons.forEach(btn => {
-        btn.classList.toggle('active-selection', btn.getAttribute('data-color') === color);
-    });
-    ui.btnSpin.disabled = false;
 };
 
 const handleSpin = async () => {
-    if (gameState.isAnimating || gameState.gameOver) return;
+    if (state.isSpinning || !state.selectedColor) return;
 
-    // Validar contra el Wallet global
-    if (!Wallet.hasEnoughChips(gameState.currentBet)) {
+    const validation = Rules.validateBet(Wallet.getBalance(), state.currentBet);
+    if (!validation.isValid) {
+        Wallet.showError("Apuesta no válida", validation.message);
+        playSound('error');
         return;
     }
 
-    gameState.isAnimating = true;
-    ui.btnSpin.disabled = true;
+    state.isSpinning = true;
+    Wallet.subtractChips(state.currentBet);
+    state.sessionBalance -= state.currentBet;
+    playSound('chip_bet');
 
-    // Restar apuesta del Wallet Global
-    Wallet.subtractChips(gameState.currentBet);
-    gameState.sessionProfit -= gameState.currentBet;
-
-    // Obtener resultado matemático
-    const result = ProbEngine.spinRoulette();
-    // calculamos el premio (incluye devolver la apuesta si gana)
-    const winAmount = ProbEngine.calculatePayout(gameState.currentBet, gameState.selectedColor, result.color);
+    const result = Probability.spinRoulette();
+    const wheel = document.getElementById('roulette-wheel');
+    const resultNum = document.getElementById('result-number');
+    const resultColorTxt = document.getElementById('result-color-text');
     
-    // Si gana, devolvemos la apuesta + el premio al Wallet
-    let finalPayout = 0;
-    if (winAmount > 0) {
-        finalPayout = gameState.currentBet + winAmount;
-        Wallet.addChips(finalPayout);
-        gameState.sessionProfit += finalPayout;
+    const spins = 5 + Math.floor(Math.random() * 5);
+    state.rotation += (spins * 360) + Math.floor(Math.random() * 360);
+    
+    if (wheel) {
+        wheel.style.transform = `rotate(${state.rotation}deg)`;
+        playSound('roulette_spin');
     }
 
-    // Animación visual
-    await animateWheel(result);
-
-    // Actualizar estado
-    gameState.rounds++;
-    gameState.history.push(result.color);
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    playSound('roulette_stop');
     
-    // UI Local
-    ui.statLastPayout.textContent = winAmount > 0 ? `+${winAmount}` : `-${gameState.currentBet}`;
-    ui.statLastPayout.className = `stat-value ${winAmount > 0 ? 'text-neon-green' : 'text-neon-red'}`;
+    if (resultNum) resultNum.textContent = result.number;
+    if (resultColorTxt) {
+        resultColorTxt.textContent = result.color.toUpperCase();
+        resultColorTxt.style.color = result.color === 'verde' ? '#2ecc71' : (result.color === 'rojo' ? '#e74c3c' : '#ccc');
+    }
+
+    const payout = Probability.calculatePayout(state.currentBet, state.selectedColor, result.color);
+    const lastPayoutEl = document.getElementById('stat-last-payout');
+    
+    if (payout > 0) {
+        Wallet.addChips(payout);
+        state.sessionBalance += payout;
+        if (lastPayoutEl) lastPayoutEl.textContent = `+${payout}`;
+        showVictory('¿Puedes Ganarle al Casino?', payout, '🎡');
+    } else {
+        if (lastPayoutEl) lastPayoutEl.textContent = `-${state.currentBet}`;
+        playSound('miss');
+    }
+
+    state.rounds++;
+    state.history.push(result);
+    state.isSpinning = false;
     
     updateUI();
-
-    // Comprobar bancarrota global
-    if (Wallet.getBalance() <= -1000) {
-        showConclusion(true);
-    }
-
-    gameState.isAnimating = false;
-    ui.btnSpin.disabled = false;
-};
-
-const animateWheel = (result) => {
-    return new Promise((resolve) => {
-        gameState.totalRotation += 1800 + Math.random() * 360; 
-        ui.wheel.style.transition = 'transform 3s cubic-bezier(0.1, 0, 0.1, 1)';
-        ui.wheel.style.transform = `rotate(${gameState.totalRotation}deg)`;
-
-        setTimeout(() => {
-            ui.resultNumber.textContent = result.number;
-            ui.resultColorText.textContent = result.color.toUpperCase();
-            ui.resultColorText.className = `color-${result.color}`;
-            resolve();
-        }, 3000);
-    });
+    checkMythBreakdown();
 };
 
 const updateUI = () => {
-    // Mostramos el beneficio/pérdida de la sesión actual
-    ui.statChips.textContent = gameState.sessionProfit;
-    ui.statChips.classList.toggle('text-neon-red', gameState.sessionProfit < 0);
-    ui.statChips.classList.toggle('text-neon-green', gameState.sessionProfit > 0);
-    
-    ui.statRounds.textContent = gameState.rounds;
+    const betDisplay = document.getElementById('bet-display');
+    const statChips = document.getElementById('stat-chips');
+    const statRounds = document.getElementById('stat-rounds');
+    const historyContainer = document.getElementById('history-container');
 
-    // Historial
-    ui.historyContainer.innerHTML = '';
-    gameState.history.slice(-15).forEach(color => {
-        const dot = document.createElement('div');
-        dot.className = `history-dot bg-${color}`;
-        ui.historyContainer.appendChild(dot);
-    });
+    if (betDisplay) betDisplay.textContent = state.currentBet;
+    if (statChips) statChips.textContent = Wallet.getBalance();
+    if (statRounds) statRounds.textContent = state.rounds;
 
-    // Actualizar Wallet Global por si acaso
-    Wallet.updateUI();
-};
-
-const showConclusion = (isBankruptcy) => {
-    gameState.gameOver = true;
-    ui.conclusion.classList.remove('hidden');
-    ui.conclusion.classList.add('animate-slide-up');
-    
-    const houseEdgeMsg = "Matemáticamente, el casino siempre tiene la ventaja debido al espacio verde (2.7% de ventaja).";
-    
-    if (isBankruptcy) {
-        ui.conclusionText.innerHTML = `<strong>¡Bancarrota Total!</strong> Has superado tu límite de crédito en el casino. <br><br> ${houseEdgeMsg} A largo plazo, el valor esperado de cada apuesta es negativo.`;
-    } else {
-        const balanceStatus = gameState.sessionProfit >= 0 ? 'ganancia' : 'pérdida';
-        ui.conclusionText.innerHTML = `<strong>Sesión Finalizada.</strong> Te retiras con una ${balanceStatus} de ${Math.abs(gameState.sessionProfit)} fichas en esta mesa. <br><br> ${houseEdgeMsg} El casino no necesita suerte, solo tiempo y jugadores.`;
+    if (historyContainer) {
+        historyContainer.innerHTML = '';
+        state.history.slice(-15).reverse().forEach(res => {
+            const item = document.createElement('div');
+            item.className = `history-badge ${res.color}`; // Usando clase del diseño original
+            // Como no tengo los estilos originales de badges, usaré inline para asegurar visibilidad
+            item.style.width = '30px';
+            item.style.height = '30px';
+            item.style.borderRadius = '50%';
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.justifyContent = 'center';
+            item.style.fontSize = '0.7rem';
+            item.style.fontWeight = 'bold';
+            item.style.background = res.color === 'verde' ? '#2ecc71' : (res.color === 'rojo' ? '#e74c3c' : '#2c3e50');
+            item.style.color = 'white';
+            item.textContent = res.number;
+            historyContainer.appendChild(item);
+        });
     }
 };
 
-const resetGameState = () => {
-    gameState = {
-        sessionProfit: 0,
-        rounds: 0,
-        history: [],
-        selectedColor: null,
-        currentBet: 10,
-        isAnimating: false,
-        gameOver: false,
-        totalRotation: 0
-    };
+const checkMythBreakdown = () => {
+    const analysisEl = document.getElementById('roulette-analysis');
+    const conclusionPanel = document.getElementById('game-conclusion');
+    const conclusionText = document.getElementById('conclusion-text');
     
-    ui.wheel.style.transition = 'none';
-    ui.wheel.style.transform = 'rotate(0deg)';
-    
-    ui.conclusion.classList.add('hidden');
-    ui.btnSpin.disabled = true;
-    ui.resultNumber.textContent = "--";
-    ui.resultColorText.textContent = "LISTO PARA GIRAR";
-    ui.resultColorText.className = "";
-    ui.statLastPayout.textContent = "0";
-    
-    ui.colorButtons.forEach(btn => btn.classList.remove('active-selection'));
-    updateUI();
+    if (state.rounds >= 5 && analysisEl) {
+        analysisEl.innerHTML = Probability.getRouletteEdgeText();
+    }
+
+    const balance = Wallet.getBalance();
+    if ((balance <= -1000 || state.rounds >= 20) && conclusionPanel) {
+        conclusionPanel.classList.remove('hidden');
+        conclusionText.innerHTML = `Tras ${state.rounds} rondas, tu balance de sesión es de <strong>${state.sessionBalance}</strong> fichas. 
+        Incluso con rachas de suerte, la <strong>Esperanza Matemática de -2.7%</strong> garantiza que el casino sea el ganador neto. 
+        El mito de que "terminarás ganando" es matemáticamente falso.`;
+    }
 };

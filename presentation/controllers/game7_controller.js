@@ -6,6 +6,8 @@
 
 import { PatternEngine } from '../../domain/pattern_engine.js';
 import * as Wallet from '../../domain/wallet_manager.js';
+import { playSound } from '../../domain/sound_manager.js';
+import { showVictory } from '../components/victory_modal.js';
 
 let engine = null;
 let ui = {};
@@ -34,7 +36,8 @@ const cacheDOM = () => {
         histogram: container.querySelector('#histogram-container'),
         modal: container.querySelector('#pattern-education-modal'),
         modalText: container.querySelector('#edu-content'),
-        btnCloseModal: container.querySelector('#btn-close-pattern-edu')
+        btnCloseModal: container.querySelector('#btn-close-pattern-edu'),
+        btnReset: container.querySelector('#btn-reset-patterns')
     };
 };
 
@@ -45,10 +48,22 @@ const bindEvents = () => {
 
     ui.btnSpin.onclick = handleSpin;
     ui.btnCloseModal.onclick = () => ui.modal.classList.add('hidden');
+    if (ui.btnReset) ui.btnReset.onclick = resetStats;
+};
+
+const resetStats = () => {
+    if (isSpinning) return;
+    engine = new PatternEngine();
+    selectedNumber = null;
+    ui.numberBtns.forEach(btn => btn.classList.remove('selected'));
+    ui.btnSpin.disabled = true;
+    updateUI();
+    playSound('click');
 };
 
 const selectNumber = (num) => {
     if (isSpinning) return;
+    playSound('click');
     selectedNumber = num;
     ui.numberBtns.forEach(btn => {
         btn.classList.toggle('selected', parseInt(btn.dataset.num) === num);
@@ -60,21 +75,58 @@ const handleSpin = async () => {
     if (isSpinning || selectedNumber === null) return;
 
     // 1. Validar Economía
-    if (!Wallet.hasEnoughChips(BET_COST)) return;
+    if (!Wallet.hasEnoughChips(BET_COST)) {
+        playSound('error');
+        return;
+    }
 
     isSpinning = true;
     ui.btnSpin.disabled = true;
+    
+    playSound('chip_bet');
     Wallet.subtractChips(BET_COST);
 
-    // Animación simple (opcional, aquí directa por ahora)
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // --- ANIMACIÓN DE GIRO ---
+    const totalSpinTime = 2000; // 2 segundos de suspenso
+    const intervalTime = 80;    // Cambio de luz cada 80ms
+    const numButtons = ui.numberBtns.length;
+    
+    let elapsed = 0;
+    const spinPromise = new Promise(resolve => {
+        const interval = setInterval(() => {
+            // Limpiar resaltado previo
+            ui.numberBtns.forEach(btn => btn.classList.remove('spinning-highlight'));
+            
+            // Iluminar uno aleatorio (o secuencial para efecto ruleta)
+            const randomIndex = Math.floor(Math.random() * numButtons);
+            ui.numberBtns[randomIndex].classList.add('spinning-highlight');
+            
+            playSound('slot_spin');
+            
+            elapsed += intervalTime;
+            if (elapsed >= totalSpinTime) {
+                clearInterval(interval);
+                ui.numberBtns.forEach(btn => btn.classList.remove('spinning-highlight'));
+                resolve();
+            }
+        }, intervalTime);
+    });
 
-    // 2. Lógica
+    await spinPromise;
+
+    // 2. Lógica de Resultado
     const result = engine.roll();
     const isHit = result === selectedNumber;
     
     if (isHit) {
-        Wallet.addChips(BET_COST * 2); // Recupera 10 + gana 10
+        const prize = BET_COST * 2;
+        Wallet.addChips(prize); // Recupera 10 + gana 10
+        
+        showVictory('¿Qué número saldrá?', prize, '🔮', () => {
+            // Callback opcional
+        });
+    } else {
+        playSound('miss');
     }
 
     engine.registerResult(isHit);
@@ -137,6 +189,7 @@ const checkEducationalTriggers = (isHit) => {
 };
 
 const showEducation = (message) => {
+    playSound('pattern_reveal');
     ui.modalText.textContent = message;
     ui.modal.classList.remove('hidden');
 };

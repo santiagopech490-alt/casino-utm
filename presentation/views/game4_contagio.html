@@ -1,58 +1,72 @@
-<div class="game-container game4-layout">
-    <div class="game-header">
-        <h2 class="text-neon-blue">Contagio en el Salón</h2>
-        <p class="game-description">
-            Apuéstale a la persona que crees que se contagiará en la siguiente ronda. 
-            El contagio solo se transmite entre <strong>vecinos directos</strong> (vecindad de Moore).
-        </p>
-    </div>
-
-    <div class="game-board-container">
-        <div id="epidemic-grid" class="epidemic-grid">
-            <!-- Celdas generadas por JS -->
+<div class="game-container animate-fade-in">
+    <header class="game-header">
+        <h2 id="game4-dynamic-title" class="text-neon-red">Contagio en el Salón</h2>
+        <div class="myth-box glass-panel-dark" style="padding: 15px; border-left: 5px solid #ff4d4d; margin-bottom: 20px;">
+            <p style="margin-bottom: 10px;"><strong>El Mito:</strong> "Un contagio ocurre al azar y no depende del contacto."</p>
+            <p id="myth-explanation" style="font-size: 0.9em; line-height: 1.5; color: #ccc;">
+                Este mito se rompió al demostrar que los contagios no son eventos aleatorios aislados, sino que dependen de la <strong>Proximidad Física</strong> y el <strong>Contacto</strong>. Al visualizar el radio de infección, demostramos que la probabilidad de enfermarse depende estrictamente de estar cerca de un nodo infectado ($P(A|B)$).
+            </p>
         </div>
+    </header>
 
-        <div class="game-controls">
-            <div class="control-panel glass-panel">
-                <h4 class="text-neon-blue">Parámetros de Simulación</h4>
-                
-                <div class="stat-item">
-                    <label for="input-p">Probabilidad de Contagio (p)</label>
-                    <div class="input-wrapper">
-                        <input type="range" id="input-p" min="0.1" max="1" step="0.1" value="0.5">
-                        <strong id="val-p" class="text-neon-blue">0.5</strong>
-                    </div>
+    <div class="game-layout epidemic-layout">
+        <!-- Área de Simulación -->
+        <section class="game-panel glass-panel simulation-area">
+            <div id="epidemic-canvas-container" class="canvas-container">
+                <!-- Los nodos se renderizarán aquí mediante el controlador -->
+                <div id="simulation-overlay" class="simulation-overlay">
+                    <p id="overlay-msg">Selecciona a una persona sana para apostar</p>
                 </div>
-
-                <div class="stat-item">
-                    <label for="input-limit">Máx. Contagios por Ronda</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="input-limit" class="number-input" min="1" max="4" value="3">
-                    </div>
-                </div>
-
-                <div class="stat-item">
-                    <label for="input-bet">Monto a Apostar (Fichas)</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="input-bet" class="number-input" min="5" step="5" value="10">
-                    </div>
-                </div>
-
-                <button id="btn-next-round" class="glass-btn primary-btn" disabled>Siguiente Ronda</button>
-                <button id="btn-reset-game" class="glass-btn secondary-btn" style="width: 100%;">Reiniciar Tablero</button>
             </div>
 
-            <div class="legend glass-panel">
-                <h4 class="text-neon-blue">Estado de los Nodos</h4>
-                <div class="legend-item"><div class="persona sana"></div> Persona Sana</div>
-                <div class="legend-item"><div class="persona contagiada"></div> Persona Contagiada</div>
-                <div class="legend-item"><div class="persona seleccionada"></div> Tu Próxima Apuesta</div>
+            <div class="game-controls epidemic-controls">
+                <div class="selection-info glass-panel">
+                    <span>Seleccionado:</span>
+                    <strong id="selected-node-name" class="text-neon-blue">Ninguno</strong>
+                </div>
+
+                <div class="bet-input-group glass-panel">
+                    <label>Apuesta:</label>
+                    <div class="bet-stepper">
+                        <button id="btn-ep-bet-minus" class="step-btn">-5</button>
+                        <strong id="ep-bet-display" class="text-neon-green">10</strong>
+                        <button id="btn-ep-bet-plus" class="step-btn">+5</button>
+                    </div>
+                </div>
+
+                <button id="btn-next-round" class="glass-btn primary-btn" disabled>SIGUIENTE RONDA</button>
             </div>
-        </div>
+        </section>
+
+        <!-- Stats y Resultados -->
+        <aside class="stats-panel">
+            <div class="stat-card glass-panel">
+                <h4>Ronda Actual</h4>
+                <span id="stat-ep-round" class="stat-value">1</span>
+            </div>
+            
+            <div class="stat-card glass-panel small">
+                <p>Personas Sanas</p>
+                <span id="stat-ep-healthy" class="stat-value text-neon-blue">0</span>
+            </div>
+
+            <div class="stat-card glass-panel small">
+                <p>Personas Contagiadas</p>
+                <span id="stat-ep-infected" class="stat-value text-neon-red">0</span>
+            </div>
+
+            <div class="stat-card glass-panel results-log">
+                <p>Resultados de Ronda</p>
+                <div id="round-results-list" class="results-list">
+                    <!-- Historial de contagios -->
+                </div>
+            </div>
+
+            <button id="btn-reset-epidemic" class="glass-btn danger-btn" style="width: 100%; margin-top: auto;">Reiniciar Simulación</button>
+        </aside>
     </div>
 
-    <div id="game-conclusion" class="conclusion-panel glass-panel hidden">
-        <span class="conclusion-emoji">🧬</span>
+    <div id="game-conclusion" class="conclusion-box glass-panel hidden">
         <p id="conclusion-text"></p>
     </div>
 </div>

@@ -1,37 +1,55 @@
 <div class="game-container game8-layout">
     <div class="game-header">
         <h2 class="text-neon-pink">La Ilusión de la Precisión</h2>
-        <p class="game-description">
-            ¿Si casi ganas, significa que estás cerca? Descubre la falacia del <strong>"Near-miss"</strong> 
-            en las máquinas tragamonedas. Cada giro es 100% independiente.
-        </p>
+        <div class="myth-box glass-panel-dark" style="padding: 15px; border-left: 5px solid #ff00ff; margin-bottom: 20px;">
+            <p style="margin-bottom: 10px;"><strong>El Mito:</strong> "Si algo casi ocurre, significa que estamos cerca de lograrlo."</p>
+            <p id="myth-explanation" style="font-size: 0.9em; line-height: 1.5; color: #ccc;">
+                Este mito se rompió al demostrar que en las máquinas tragamonedas, los rodillos son controlados por un <strong>Generador de Números Aleatorios (RNG)</strong> independiente para cada parada. Un "casi-acierto" (Near-miss) es programado deliberadamente para crear una ilusión de proximidad, cuando en realidad la probabilidad de ganar en el siguiente giro sigue siendo exactamente la misma.
+            </p>
+        </div>
     </div>
 
     <div class="slot-machine-container glass-panel">
-        <div class="slot-machine-frame">
+        <div class="session-stats-bar glass-panel" style="margin-bottom: 20px; display: flex; justify-content: space-around; padding: 10px;">
+            <div>Giros: <strong id="stat-slots-rounds" class="text-neon-blue">0</strong></div>
+            <div>Premios: <strong id="stat-slots-wins" class="text-neon-green">0</strong></div>
+            <button id="btn-reset-slots-stats" class="glass-btn danger-btn small-btn" style="padding: 2px 10px; font-size: 0.7rem;">RESET_STATS</button>
+        </div>
+        <div class="slot-machine-frame crt-outer">
             <div class="reels-container">
-                <div id="reel-1" class="reel glass-panel-dark">
-                    <div class="reel-symbols">7️⃣</div>
+                <div id="reel-1" class="reel">
+                    <div class="reel-symbols">💰</div>
                 </div>
-                <div id="reel-2" class="reel glass-panel-dark">
-                    <div class="reel-symbols">⭐</div>
+                <div id="reel-2" class="reel">
+                    <div class="reel-symbols">🎰</div>
                 </div>
-                <div id="reel-3" class="reel glass-panel-dark">
-                    <div class="reel-symbols">🍒</div>
+                <div id="reel-3" class="reel">
+                    <div class="reel-symbols">💎</div>
                 </div>
             </div>
             
-            <div class="paytable-mini">
-                <span class="pay-item">7️⃣7️⃣7️⃣: 100</span>
-                <span class="pay-item">⭐⭐⭐: 1000</span>
-                <span class="pay-item">🔔🔔🔔: 25</span>
-                <span class="pay-item">🍒🍒🍒: 15</span>
+            <div class="paytable-full">
+                <div class="pay-row jackpot-row">💰💰💰: 5000</div>
+                <div class="pay-row">⭐⭐⭐: 1000</div>
+                <div class="pay-row">💎💎💎: 500</div>
+                <div class="pay-row">7️⃣7️⃣7️⃣: 100</div>
+                <div class="pay-row">🎰🎰🎰: 50</div>
+                <div class="pay-row">🔔🔔🔔: 25</div>
+                <div class="pay-row">🍒🍒🍒: 15</div>
             </div>
         </div>
 
+        <!-- PALANCA 3D AVANZADA -->
         <div class="machine-controls">
-            <div class="cost-tag">Costo: 50 Fichas</div>
-            <button id="btn-spin-slots" class="glass-btn primary-btn large-btn btn-neon-green">GIRAR</button>
+            <div class="cost-tag">COSTO: 50 CR</div>
+            <div id="slot-lever" class="slot-lever-3d">
+                <div class="lever-base-3d"></div>
+                <div class="lever-shaft-group">
+                    <div class="lever-shaft"></div>
+                    <div class="lever-knob"></div>
+                </div>
+            </div>
+            <div class="lever-label-3d">PULL_TO_SPIN</div>
         </div>
     </div>
 

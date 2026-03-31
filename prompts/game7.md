@@ -5,6 +5,9 @@
 [CONTEXT]
 El objetivo de esta simulación es desmitificar la creencia de que "los números tienen patrones" en sistemas de azar puro. El usuario participará en un juego de ruleta (1-10) donde debe intentar predecir el siguiente resultado, enfrentándose a la realidad estadística de la aleatoriedad y la frecuencia relativa.
 
+**Mito a desmentir:** "Los números tienen patrones."
+**Explicación del Mito:** Este mito se rompió al demostrar que en procesos de azar puro, cada evento es estrictamente independiente. La percepción de "patrones" es en realidad una ilusión cognitiva conocida como **Apofenia**, donde nuestro cerebro intenta encontrar orden y secuencias donde solo existe ruido estadístico y aleatoriedad total.
+
 [SIMULATION_PARAMETERS]
 - **Mecánica:** Ruleta de 10 sectores (Números del 1 al 10).
 - **Probabilidad por tiro:** $P(n) = 1/10$ (Eventos Independientes).
@@ -20,6 +23,15 @@ En cada turno, la IA debe generar un reporte visual en texto que incluya:
 2. **Historial de Resultados:** Lista de los últimos 10 números aparecidos.
 3. **Gráfico de Frecuencia Relativa:** Histograma de caracteres (ej: `[7]: ***** (5)`) que muestre cuántas veces ha salido cada número en total.
 4. **Visualizador de Racha:** Indicar cuántos errores o aciertos consecutivos lleva el usuario.
+
+[AUDIO_FEEDBACK]
+La simulación debe integrar efectos sonoros mediante `sound_manager.js`:
+- **Selección:** Sonido de `click` al elegir un número.
+- **Apuesta:** Sonido de `chip_bet` al confirmar la jugada.
+- **Giro:** Sonido repetitivo de `slot_spin` durante la animación de espera.
+- **Resultado Positivo:** Sonido de `slot_win` al acertar.
+- **Resultado Negativo:** Sonido de `miss` al fallar.
+- **Intervención Educativa:** Sonido de `pattern_reveal` al mostrar modales explicativos.
 
 [LOGIC_CONSTRAINTS]
 - **Independencia Total:** El resultado de un tiro NO influye en el siguiente. No existe el concepto de "número caliente" o "número debido".

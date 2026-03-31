@@ -1,44 +1,30 @@
-# Prompt: Desarrollo del Juego 3 - La carta que nunca sale (Versión con Baraja Aleatoria)
+# Prompt: Desarrollo del Juego 3 - La Carta que Nunca Sale (Simulador de Mazo de 20)
 
-**Rol:** Actúa como un Desarrollador Web Senior experto en Vanilla JS, HTML5 y CSS3, y como un profesor de Probabilidad y Estadística.
+**Rol:** Actúa como un Desarrollador Web Senior experto en Vanilla JS y Psicología del Juego.
 
-**Contexto del Proyecto:** SPA "CASINO UTM" con Clean Architecture, diseño Glassmorphism y un Wallet Global de fichas.
+**Contexto:** SPA "CASINO UTM" con diseño Glassmorphism y Wallet Global.
 
-**Tarea:** Modifica profundamente la lógica del **"Juego 3"**. Ahora, en lugar de un sorteo aleatorio, el juego presenta una baraja de 20 cartas con valores generados al azar, y el jugador tiene dos formas de jugar.
+**Tarea:** Implementar un simulador de mazo de 20 cartas con reposición total, siguiendo estas especificaciones:
 
-### Flujo del Juego:
-1.  Al iniciar, se genera una "baraja" de 20 cartas. Cada una recibe un valor aleatorio del 1 al 20 (los números pueden repetirse, y algunos pueden no aparecer). El jugador las ve boca abajo.
-2.  El jugador introduce su número de apuesta (1-20) en el campo de texto. Esto habilita las acciones.
-3.  El jugador ajusta el monto de su apuesta.
-4.  El jugador elige una de dos acciones. **Cualquier acción termina la ronda.**
-    *   **Opción A: Revelar una Carta.**
-        *   El jugador hace clic en una de las 20 cartas del tablero.
-        *   Se cobra el monto de la apuesta (Costo x1).
-        *   La carta se voltea. Si el número revelado coincide con su apuesta, gana el **doble** de lo apostado (Premio x2).
-    *   **Opción B: Revelar Todas.**
-        *   El jugador presiona el botón "Revelar Todas".
-        *   Se cobra el **doble** del monto de la apuesta (Costo x2).
-        *   Todas las 20 cartas se voltean. Si el número de su apuesta se encuentra entre cualquiera de las cartas reveladas, gana el **triple** de lo apostado (Premio x3).
-5.  Después de la acción, se muestra un modal que indica si ganó o perdió, el premio obtenido y un botón para "Jugar de Nuevo", que reinicia el tablero con una nueva baraja aleatoria.
+### 1. Lógica de Sorteo y Aleatoriedad
+*   **Reposición Total:** Las cartas salen con reposición (pueden repetirse y algunas pueden no aparecer).
+*   **Modos de Robo:**
+    *   **1x1:** El usuario selecciona su carta (1-20) y se genera un resultado único.
+    *   **Full 20:** El usuario selecciona una carta y se generan 20 resultados simultáneos.
 
-### Requisitos técnicos y Archivos a modificar:
+### 2. Sistema de Incentivos (Psicología)
+*   **Algoritmo Hot/Cold:** Detectar cartas que no han salido en las últimas rondas (ej. últimas 20 tiradas) y mostrar un banner visual: "¡Esta carta no ha salido! Si la eliges ahora, tus aciertos valen x2".
+*   **Contador de Oportunidad Perdida:** Rastrear si el usuario cambió su elección y, en el siguiente tiro, salió la carta que acababa de abandonar. Incrementar un contador visual.
 
-**1. `presentation/views/game3_cartas.html` (Modificación):**
-*   Reemplazar el botón `#btn-draw` por `#btn-reveal-all` con el texto "Revelar Todas (Costo x2)".
+### 3. Economía y Atributos Visuales
+*   **Fichas:** Saldo inicial 1000. Regla fija: Acierto = +10, Fallo = -10.
+*   **Interfaz:**
+    *   **Cabecera:** Título del juego y el mito: *"Si una carta no ha salido en mucho tiempo, ahora es más probable."*. Justo debajo, una breve explicación de cómo se rompió este mito (Falacia del Jugador) explicando la independencia de los eventos en un mazo con reposición total.
+    *   **Animación:** Efecto visual de "flip" 3D y animación de barajado (shuffle) al reiniciar el tablero.
+    *   **Frecuencímetro:** Tabla dinámica que muestre cuántas veces ha salido cada una de las 20 cartas.
+    *   **Marcadores:** Contador de aciertos totales y contador de "oportunidades perdidas" (pérdidas por cambio de carta).
 
-**2. `assets/css/game3.css` (Modificación):**
-*   Implementar estilos para que las `.mini-card` puedan voltearse. Esto requiere una estructura interna (ej. `.mini-card-inner` con un anverso y un reverso) y una clase `.is-flipped` que active la animación de `transform: rotateY(180deg)`.
-*   Añadir estilos para el anverso de la carta (`.mini-card-front`) con estados `.win` y `.loss`.
-
-**3. `presentation/controllers/game3_controller.js` (Reescritura mayor):**
-*   **Generación de Baraja:**
-    *   Crear una función `generateGridDeck()` que genere un array de 20 números aleatorios (1-20, con reemplazo) y lo guarde en `gameState.gridDeck`.
-    *   Llamar a esta función en `resetGameState()`.
-*   **Renderizado de Cartas:** `renderCardsGrid` debe crear la estructura HTML para las cartas volteables (con anverso y reverso).
-*   **Nuevas Acciones de Juego:**
-    *   `handleCardClick` (Revelar una): Debe contener la lógica del juego para revelar una sola carta, calcular coste/premio y finalizar la ronda.
-    *   `handleRevealAll` (Revelar todas): Debe contener la lógica para el coste x2, la búsqueda del número en `gameState.gridDeck`, el cálculo del premio x3 y la finalización de la ronda.
-    *   El antiguo `handleDraw` debe ser eliminado.
-*   **Control de Estado:** El `gameState` debe incluir `gameEnded` para bloquear acciones después de que se haya revelado una carta o todas. `setControls` debe ser actualizado para manejar este estado.
-
-**Restricción:** La lógica de la baraja es fundamental. Debe generarse una nueva baraja aleatoria en cada `resetGameState` para que la probabilidad cambie en cada partida.
+### Requisitos Técnicos:
+*   **Controller:** `presentation/controllers/game3_controller.js` debe gestionar el estado de frecuencias, historia reciente y rastreo de cambios de carta.
+*   **View:** `presentation/views/game3_cartas.html` debe incluir el selector de modo, el frecuencímetro y los banners de incentivos.
+*   **CSS:** `assets/css/game3.css` debe implementar la animación de flip y los estilos para el frecuencímetro en rejilla.

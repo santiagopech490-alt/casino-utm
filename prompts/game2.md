@@ -13,10 +13,20 @@ La mecánica es una ruleta (Verde, Rojo, Negro). El usuario inicia con 100 ficha
 * **Animaciones Sutiles:** Elimina animaciones innecesarias de escalado (`scale`) o desplazamientos bruscos en botones pequeños. Prefiere transiciones suaves de opacidad, color de fondo o `text-shadow` para el feedback visual.
 * **Espaciado:** Utiliza la propiedad `gap` en contenedores flex para mantener una separación consistente sin depender de márgenes manuales.
 
+* **Integración de Sonido:** Implementa retroalimentación auditiva mediante `sound_manager.js` para las siguientes acciones:
+    * Selección de color (`click`).
+    * Realización de apuesta (`chip_bet`).
+    * Giro de la ruleta (`roulette_spin`).
+    * Detención de la ruleta (`roulette_stop`).
+    * Victoria (`slot_win`) y Pérdida (`miss`).
+    * Errores de saldo (`error`).
+
 ### Requisitos técnicos y Archivos a generar:
 
 **1. `presentation/views/game2_ruleta.html` (Solo fragmento HTML):**
-* Estructura Glassmorphism. Cabecera con título y mito.
+* Estructura Glassmorphism. Cabecera con título y el mito: *"Si juegas suficiente tiempo, terminarás ganando"*.
+* **Sección del Mito:** Justo debajo del título, incluir el texto del mito y una breve explicación estática o dinámica que resuma cómo se rompió esta creencia mediante el análisis de la ventaja de la casa y la esperanza matemática negativa.
+* Contenedor dinámico de "Análisis de Probabilidad" para mostrar datos en tiempo real de por qué este mito es falso (esperanza matemática).
 * Contenedor visual para la Ruleta animada (puede ser CSS o un elemento circular dividido) y un indicador de resultado.
 * Controles de Apuesta: Botones o un selector para elegir color (Rojo, Negro, Verde). Selector de cantidad a apostar (de 10 en 10, tope de 100 por tiro).
 * Botones de Acción: "Apostar y Girar" (centrado y destacado).
@@ -31,10 +41,12 @@ La mecánica es una ruleta (Verde, Rojo, Negro). El usuario inicia con 100 ficha
 * Exportar función `validateBet(currentChips, betAmount)` para asegurar que la apuesta sea en múltiplos de 10, máximo 100, y no exceda el límite de deuda (-1000).
 
 **4. `presentation/controllers/game2_controller.js` (Orquestador UI):**
-* Importar lógica matemática y reglas de negocio.
-* Estado local: Fichas (100 inicial), límite (-1000), color seleccionado, apuesta actual.
+* **Gestión de Estado:** Reiniciar el historial y rondas en cada llamada a `initGame2`.
+* Importar lógica matemática, reglas de negocio y `sound_manager.js`.
+* Estado local: Fichas, límite de deuda, color seleccionado, apuesta actual.
 * Lógica al Girar: Validar apuesta, restar fichas temporalmente, animar la ruleta (esperar asíncronamente), obtener resultado, aplicar ganancias/pérdidas, y actualizar el DOM.
-* Lógica de "Bancarrota" (al llegar a -1000) o Fin de Sesión: Ocultar controles, mostrar panel de conclusión explicando que la ventaja matemática de la casa (por el Verde) garantiza que a la larga el valor esperado del jugador es negativo, rompiendo el mito.
+* **Explicación del Mito:** Tras 10 rondas o al alcanzar una deuda significativa, mostrar dinámicamente que la "ventaja de la casa" (el cero verde) hace que la **Esperanza Matemática sea negativa (-2.7%)**, asegurando que el casino siempre gane a largo plazo.
+* Lógica de "Bancarrota" (al llegar a -1000): Ocultar controles y mostrar conclusión final rompiendo el mito con los datos reales de la sesión.
 
 **5. `assets/css/game2.css`:**
 * Estilos para la ruleta (colores neón rojo, verde, negro) y animación de giro (`@keyframes spin`).

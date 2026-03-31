@@ -1,10 +1,12 @@
 <div class="game-container game7-layout">
     <div class="game-header">
         <h2 class="text-neon-blue">¿Qué número saldrá?</h2>
-        <p class="game-description">
-            Intenta predecir el siguiente número del 1 al 10. Desmitifica la creencia de que existen 
-            patrones en el azar puro. ¡La ruleta no tiene memoria!
-        </p>
+        <div class="myth-box glass-panel-dark" style="padding: 15px; border-left: 5px solid #00d2ff; margin-bottom: 20px;">
+            <p style="margin-bottom: 10px;"><strong>El Mito:</strong> "Los números tienen patrones."</p>
+            <p id="myth-explanation" style="font-size: 0.9em; line-height: 1.5; color: #ccc;">
+                Este mito se rompió al demostrar que en procesos de azar puro, cada evento es estrictamente independiente. La percepción de "patrones" es en realidad una ilusión cognitiva conocida como <strong>Apofenia</strong>, donde nuestro cerebro intenta encontrar orden y secuencias donde solo existe ruido estadístico y aleatoriedad total. ¡La ruleta no tiene memoria!
+            </p>
+        </div>
     </div>
 
     <div class="game-main-content">
@@ -33,7 +35,10 @@
 
         <!-- Dashboard de Estado -->
         <div class="stats-dashboard glass-panel">
-            <h4 class="text-neon-blue">Estadísticas de Sesión</h4>
+            <div class="dash-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 class="text-neon-blue">Estadísticas de Sesión</h4>
+                <button id="btn-reset-patterns" class="glass-btn danger-btn small-btn" style="padding: 2px 10px; font-size: 0.7rem;">RESET_LOG</button>
+            </div>
             <div class="dash-grid">
                 <div class="dash-card">
                     <span class="label">Aciertos (✅)</span>

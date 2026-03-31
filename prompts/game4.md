@@ -11,6 +11,7 @@
 ## 2. Definición del Juego
 - **Nombre:** "Contagio en el Salón"
 - **Mito a desmentir:** "Un contagio ocurre al azar y no depende del contacto."
+- **Explicación del Mito:** Este mito se rompió al demostrar que los contagios no son eventos aleatorios aislados, sino que dependen de la **Proximidad Física** y el **Contacto**. Al visualizar el radio de infección, demostramos que la probabilidad de enfermarse depende estrictamente de estar cerca de un nodo infectado ($P(A|B)$).
 - **Conceptos Clave:** Eventos dependientes y Probabilidad Condicional $P(A|B)$.
 
 ## 3. Requisitos de Lógica (`domain/epidemic_engine.js`)
@@ -21,12 +22,14 @@
 - **Aceleración**: El límite de contagios por ronda aumenta automáticamente cada vez que se avanza.
 
 ## 4. Requisitos de UI (`presentation/controllers/game4_controller.js`)
+- **Cabecera**: Título del juego y el mito: *"Un contagio ocurre al azar y no depende del contacto."*. Justo debajo, la breve explicación de cómo se rompió este mito mediante la demostración de la dependencia del contacto y la proximidad.
 - **Interacción Principal**: 
   1. El usuario selecciona una persona sana.
   2. Define el **Monto a Apostar** (mínimo 5 fichas).
   3. **Validación de Saldo**: Antes de procesar la ronda, se debe verificar que el usuario tenga suficientes fichas. Si no, se muestra un mensaje de "Fichas insuficientes".
   4. Al presionar "Siguiente Ronda", se ejecuta el motor y se actualiza el wallet según el resultado.
 - **Visualización**: Animación fluida mediante `requestAnimationFrame` a 60 FPS.
+- **Título Dinámico**: El título de la aplicación debe actualizarse para mostrar la ronda actual (ej: "Contagio Dinámico - Ronda 1"). Esta actualización debe ocurrir solo cuando cambie el estado del juego (inicio, siguiente ronda, reinicio) para evitar conflictos con el router de la SPA.
 - **Feedback**: Mensajes personalizados usando el nombre de la persona seleccionada.
 
 ## 5. Requisitos Visuales (`assets/css/game4.css`)
@@ -41,5 +44,6 @@
 ## 6. Instrucciones para la IA
 1. Implementar usando **ES Modules**.
 2. Garantizar que la velocidad de movimiento sea lenta y natural.
-3. **Control de Economía**: El sistema de apuestas DEBE validar el saldo mediante `wallet_manager.js` antes de permitir cualquier operación de cobro.
-4. Mostrar una ventana emergente o modal si el usuario intenta apostar más de lo que posee.
+3. **Limpieza de SPA**: Asegurarse de cancelar el bucle de `requestAnimationFrame` cuando el usuario navegue fuera del juego para evitar fugas de memoria y errores de UI.
+4. **Control de Economía**: El sistema de apuestas DEBE validar el saldo mediante `wallet_manager.js` antes de permitir cualquier operación de cobro.
+5. Mostrar una ventana emergente o modal si el usuario intenta apostar más de lo que posee.

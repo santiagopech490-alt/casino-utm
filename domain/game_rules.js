@@ -1,31 +1,38 @@
 /**
  * =========================================
- * GAME RULES - Reglas de Negocio
+ * GAME RULES - Reglas de Negocio del Casino
  * =========================================
  */
 
 /**
- * Valida la apuesta según las reglas:
- * 1. Múltiplo de 10.
- * 2. Máximo 100 por tiro.
- * 3. No exceder el límite de deuda de -1000.
- * @param {number} currentChips - Fichas actuales del jugador.
- * @param {number} betAmount - Cantidad que intenta apostar.
- * @param {number} debtLimit - Límite de deuda (negativo).
- * @returns {object} { valid: boolean, message: string }
+ * Valida si una apuesta es permitida.
+ * @param {number} currentBalance Saldo actual del Wallet.
+ * @param {number} betAmount Cantidad que se desea apostar.
+ * @param {object} constraints Restricciones adicionales (min, max, debtLimit).
+ * @returns {object} { isValid, message }
  */
-export const validateBet = (currentChips, betAmount, debtLimit = -1000) => {
-    if (betAmount <= 0) {
-        return { valid: false, message: 'La apuesta debe ser mayor a 0.' };
-    }
+export const validateBet = (currentBalance, betAmount, constraints = { min: 10, max: 100, debtLimit: -1000 }) => {
+    // Regla 1: Múltiplos de 10
     if (betAmount % 10 !== 0) {
-        return { valid: false, message: 'La apuesta debe ser múltiplo de 10.' };
+        return { isValid: false, message: "La apuesta debe ser en múltiplos de 10." };
     }
-    if (betAmount > 100) {
-        return { valid: false, message: 'La apuesta máxima por tiro es de 100 fichas.' };
+
+    // Regla 2: Límites de mesa
+    if (betAmount < constraints.min || betAmount > constraints.max) {
+        return { isValid: false, message: `La apuesta debe estar entre ${constraints.min} y ${constraints.max} fichas.` };
     }
-    if (currentChips - betAmount < debtLimit) {
-        return { valid: false, message: `Has excedido el límite de deuda permitido (${debtLimit} fichas).` };
+
+    // Regla 3: Límite de crédito (Deuda)
+    if (currentBalance - betAmount < constraints.debtLimit) {
+        return { isValid: false, message: "Has alcanzado el límite de crédito permitido (-1000)." };
     }
-    return { valid: true, message: 'Apuesta válida.' };
+
+    return { isValid: true };
 };
+
+/**
+ * Determina si el jugador ha entrado en bancarrota total.
+ * @param {number} balance Saldo actual.
+ * @returns {boolean}
+ */
+export const isBankrupt = (balance) => balance <= -1000;

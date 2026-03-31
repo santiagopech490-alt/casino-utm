@@ -3,19 +3,26 @@
  * GAME 8 CONTROLLER - La Ilusión de la Precisión
  * =========================================
  */
-
 import { SlotEngine } from '../../domain/slot_engine.js';
 import * as Wallet from '../../domain/wallet_manager.js';
+import { playSound } from '../../domain/sound_manager.js';
+import { showVictory } from '../components/victory_modal.js';
 
 let engine = null;
 let ui = {};
 let isSpinning = false;
 const SPIN_COST = 50;
 
+let stats = {
+    rounds: 0,
+    wins: 0
+};
+
 export const initGame8 = () => {
     engine = new SlotEngine();
     cacheDOM();
     bindEvents();
+    updateUI();
 };
 
 const cacheDOM = () => {
@@ -28,26 +35,27 @@ const cacheDOM = () => {
             container.querySelector('#reel-2'),
             container.querySelector('#reel-3')
         ],
-        btnSpin: container.querySelector('#btn-spin-slots'),
+        lever: container.querySelector('#slot-lever'),
         feedback: container.querySelector('#slot-feedback'),
         feedbackIcon: container.querySelector('#feedback-icon'),
         feedbackMsg: container.querySelector('#feedback-message'),
+        statRounds: container.querySelector('#stat-slots-rounds'),
+        statWins: container.querySelector('#stat-slots-wins'),
+        btnReset: container.querySelector('#btn-reset-slots-stats'),
         modalBankruptcy: container.querySelector('#slot-bankruptcy-modal'),
-        btnReset: container.querySelector('#btn-slot-reset')
+        btnModalReset: container.querySelector('#btn-slot-reset')
     };
 };
 
 const bindEvents = () => {
-    if (ui.btnSpin) ui.btnSpin.onclick = handleSpin;
-    if (ui.btnReset) ui.btnReset.onclick = () => {
-        ui.modalBankruptcy.classList.add('hidden');
-    };
+    if (ui.lever) ui.lever.onclick = handleSpin;
+    if (ui.btnReset) ui.btnReset.onclick = resetStats;
+    if (ui.btnModalReset) ui.btnModalReset.onclick = () => ui.modalBankruptcy.classList.add('hidden');
 };
 
 const handleSpin = async () => {
     if (isSpinning) return;
 
-    // 1. Validar Economía
     if (!Wallet.hasEnoughChips(SPIN_COST)) {
         if (Wallet.getBalance() < SPIN_COST) {
             ui.modalBankruptcy.classList.remove('hidden');
@@ -56,71 +64,78 @@ const handleSpin = async () => {
     }
 
     isSpinning = true;
-    ui.btnSpin.disabled = true;
+    ui.lever.classList.add('pulled');
+    playSound('lever_pull');
     ui.feedback.classList.add('hidden');
     
-    // Limpiar clases de animaciones previas
-    ui.reels.forEach(r => r.classList.remove('highlight-win', 'highlight-near'));
-
-    // Cobrar
+    ui.reels.forEach(r => r.classList.remove('highlight-win', 'highlight-near', 'highlight-jackpot'));
     Wallet.subtractChips(SPIN_COST);
 
-    // 2. Generar Resultado
     const result = engine.generateResult();
-
-    // 3. Animación de los rodillos
     await animateSpin(result);
-
-    // 4. Procesar Resultado y Feedback
     processOutcome(result);
 
-    isSpinning = false;
-    ui.btnSpin.disabled = false;
+    setTimeout(() => {
+        ui.lever.classList.remove('pulled');
+        isSpinning = false;
+    }, 500);
 };
 
 const animateSpin = async (result) => {
-    // Todos empiezan a girar
     ui.reels.forEach(r => r.classList.add('spinning'));
-
-    // Función para mostrar emojis random durante el giro
     const updateRandomSymbols = (reelIndex) => {
         const reel = ui.reels[reelIndex];
         const symbolDiv = reel.querySelector('.reel-symbols');
         const randomSymbol = engine.symbols[Math.floor(Math.random() * engine.symbols.length)];
         symbolDiv.textContent = randomSymbol.icon;
+        playSound('slot_spin');
     };
 
-    // Intervalos para cambiar símbolos rápidamente
     const intervals = ui.reels.map((_, i) => setInterval(() => updateRandomSymbols(i), 100));
 
-    // Parar uno por uno con retraso
     for (let i = 0; i < ui.reels.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000 + i * 600));
+        await new Promise(resolve => setTimeout(resolve, 1000 + i * 800));
         clearInterval(intervals[i]);
         ui.reels[i].classList.remove('spinning');
         ui.reels[i].querySelector('.reel-symbols').textContent = engine.getSymbolIcon(result.rodillos[i]);
+        playSound('slot_stop');
     }
 };
 
 const processOutcome = (result) => {
+    stats.rounds++;
     ui.feedback.classList.remove('hidden');
 
-    if (result.tipoResultado === 'win') {
+    if (result.tipoResultado === 'win' || result.tipoResultado === 'jackpot') {
+        stats.wins++;
         Wallet.addChips(result.premio);
-        ui.reels.forEach(r => r.classList.add('highlight-win'));
-        
-        ui.feedbackIcon.textContent = '🎉';
-        ui.feedbackMsg.innerHTML = `<strong>¡Ganaste ${result.premio} fichas!</strong> <br> Pero cuidado: las probabilidades de este giro eran exactamente iguales a las de cualquier otro. El azar no tiene memoria.`;
-    } 
-    else if (result.tipoResultado === 'near-miss') {
+        showVictory(result.tipoResultado === 'jackpot' ? '¡JACKPOT SLOTS!' : 'Tragamonedas', result.premio, '🎰');
+
+        if (result.tipoResultado === 'jackpot') {
+            ui.reels.forEach(r => r.classList.add('highlight-jackpot'));
+            playSound('jackpot');
+        } else {
+            ui.reels.forEach(r => r.classList.add('highlight-win'));
+            playSound('slot_win');
+        }
+    } else if (result.tipoResultado === 'near-miss') {
         ui.reels[0].classList.add('highlight-near');
         ui.reels[1].classList.add('highlight-near');
-        
-        ui.feedbackIcon.textContent = '👀';
-        ui.feedbackMsg.innerHTML = `<strong>¡Casi!</strong> Sacar dos iguales NO significa que la máquina esté "a punto" de pagar. Es una ilusión visual diseñada para que sigas apostando.`;
-    } 
-    else {
-        ui.feedbackIcon.textContent = '💡';
-        ui.feedbackMsg.innerHTML = `Nada esta vez. Recuerda que cada rodillo es un evento independiente.`;
+        playSound('miss');
     }
+    
+    updateUI();
+};
+
+const updateUI = () => {
+    if (ui.statRounds) ui.statRounds.textContent = stats.rounds;
+    if (ui.statWins) ui.statWins.textContent = stats.wins;
+    Wallet.updateUI();
+};
+
+const resetStats = () => {
+    if (isSpinning) return;
+    stats = { rounds: 0, wins: 0 };
+    updateUI();
+    playSound('click');
 };

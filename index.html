@@ -35,6 +35,7 @@
                     <h3 id="current-game-title">Selecciona un juego</h3>
                 </div>
                 <div class="user-wallet">
+                    <button id="btn-exit-to-welcome" class="glass-btn secondary-btn small-btn" style="margin-right: 15px; padding: 5px 15px;">🏠 Salir</button>
                     <span>Fichas: </span>
                     <strong id="wallet-balance">1000</strong>
                     <button id="btn-recharge-modal" class="small-icon-btn">+</button>
@@ -42,10 +43,8 @@
             </header>
 
             <section id="main-content" class="glass-panel content-area">
-                <div class="welcome-message">
-                    <h2>Bienvenido al Casino UTM</h2>
-                    <p>Selecciona un minijuego en el panel izquierdo para comenzar a romper mitos.</p>
-                </div>
+                <!-- El contenido se cargará dinámicamente desde presentation/views/welcome.html -->
+                <div class="loading-spinner">Cargando Casino UTM...</div>
             </section>
 
         </main>
@@ -56,12 +55,14 @@
         <div class="glass-panel modal-content">
             <span class="modal-emoji">💰</span>
             <h2 class="text-neon-blue">Gestión de Fichas</h2>
-            <p style="color: #aaa; margin-top: 10px;">Ingresa la cantidad deseada</p>
+            <p style="color: #aaa; margin-top: 10px;">Límite de crédito: <strong class="text-neon-red">-1000</strong></p>
             
             <div class="chip-input-group">
-                <button id="btn-minus-5" class="glass-btn step-btn">-5</button>
-                <input type="number" id="input-chip-amount" class="chip-number-input" value="100" min="5" step="5">
-                <button id="btn-plus-5" class="glass-btn step-btn">+5</button>
+                <button id="btn-minus-500" class="glass-btn step-btn">-500</button>
+                <button id="btn-minus-5" class="glass-btn step-btn">-100</button>
+                <input type="number" id="input-chip-amount" class="chip-number-input" value="500" min="0" step="100">
+                <button id="btn-plus-5" class="glass-btn step-btn">+100</button>
+                <button id="btn-plus-500" class="glass-btn step-btn">+500</button>
             </div>
 
             <div class="modal-actions">
@@ -79,6 +80,22 @@
             <h2 id="confirm-title" class="text-neon-green">¡Confirmado!</h2>
             <p id="confirm-text" style="color: #eee; margin: 15px 0; line-height: 1.5;"></p>
             <button id="btn-confirm-ok" class="glass-btn primary-btn" style="width: 100%;">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Modal de Victoria (Victory Modal) -->
+    <div id="victory-modal" class="modal-overlay">
+        <div class="glass-panel modal-content" style="border-color: rgba(0, 255, 136, 0.4); box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);">
+            <span id="victory-emoji" class="modal-emoji">🏆</span>
+            <h2 id="victory-title" class="text-neon-green">¡HAS GANADO!</h2>
+            <p id="victory-game-name" style="color: #e0d4ff; font-weight: bold; margin-bottom: 5px;"></p>
+            
+            <div class="victory-result glass-panel" style="padding: 15px; margin: 20px 0; background: rgba(0, 255, 136, 0.1);">
+                <p style="font-size: 0.9rem; color: #aaa;">Fichas Ganadas:</p>
+                <strong id="victory-amount" class="text-neon-green" style="font-size: 2.5rem;">+0</strong>
+            </div>
+
+            <button id="btn-victory-confirm" class="glass-btn primary-btn" style="width: 100%; background: rgba(0, 255, 136, 0.2); border-color: #00ff88;">Continuar</button>
         </div>
     </div>
 

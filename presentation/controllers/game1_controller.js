@@ -1,153 +1,166 @@
-import * as ProbEngine from '../../domain/probability_engine.js';
+/**
+ * =========================================
+ * GAME 1 CONTROLLER - LA FALACIA DEL JUGADOR
+ * =========================================
+ */
+import * as Probability from '../../domain/probability_engine.js';
 import * as Wallet from '../../domain/wallet_manager.js';
+import * as Rules from '../../domain/game_rules.js';
+import { playSound } from '../../domain/sound_manager.js';
+import { showVictory } from '../components/victory_modal.js';
 
-let gameState = { 
-    history: [], 
-    userCurrentChoice: null, 
-    userHits: 0, 
-    userMisses: 0, 
-    isAnimating: false,
-    betAmount: 10
+// Estado local encapsulado
+let state = {
+    history: [],
+    currentBet: 10,
+    userChoice: null,
+    wins: 0,
+    losses: 0,
+    isFlipping: false
 };
 
-let ui = {};
-
+/**
+ * Inicializa el juego reiniciando el estado y vinculando eventos.
+ */
 export const initGame1 = () => {
-    const setup = () => {
-        cacheDOM();
-        if (ui.container) {
-            bindEvents();
-            gameState.isAnimating = false;
-            updateUI();
-            if (gameState.userCurrentChoice) {
-                ui.btnFlip1.disabled = false;
-                selectChoice(gameState.userCurrentChoice);
-            }
-            console.log('[Game1] Vinculación exitosa.');
-        } else {
-            setTimeout(setup, 50);
-        }
+    console.log('[Game1] Reiniciando estado e inicializando...');
+    
+    state = {
+        history: [],
+        currentBet: 10,
+        userChoice: null,
+        wins: 0,
+        losses: 0,
+        isFlipping: false
     };
-    setup();
+
+    setupEventListeners();
+    updateUI();
 };
 
-const cacheDOM = () => {
-    const container = document.querySelector('.game-container');
-    if (!container) return;
-    ui = {
-        container,
-        coin: container.querySelector('#coin'),
-        timeline: container.querySelector('#sequence-timeline'),
-        btnCara: container.querySelector('[data-choice="cara"]'),
-        btnCruz: container.querySelector('[data-choice="cruz"]'),
-        btnFlip1: container.querySelector('#btn-flip-1'),
-        btnFlip20: container.querySelector('#btn-flip-20'),
-        btnReset: container.querySelector('#btn-reset'),
-        stats: {
-            total: container.querySelector('#stat-total'),
-            caras: container.querySelector('#stat-caras'),
-            cruces: container.querySelector('#stat-cruces'),
-            percCaras: container.querySelector('#perc-caras'),
-            percCruces: container.querySelector('#perc-cruces'),
-            hits: container.querySelector('#stat-hits'),
-            misses: container.querySelector('#stat-misses')
-        },
-        conclusion: container.querySelector('#game-conclusion'),
-        conclusionText: container.querySelector('#conclusion-text')
+const setupEventListeners = () => {
+    const btnFlip1 = document.getElementById('btn-flip-1');
+    const btnFlip20 = document.getElementById('btn-flip-20');
+    const btnReset = document.getElementById('btn-reset');
+
+    // Selección Cara/Cruz
+    document.querySelectorAll('.btn-choice').forEach(btn => {
+        btn.onclick = (e) => {
+            state.userChoice = e.currentTarget.dataset.choice;
+            document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            if (btnFlip1) btnFlip1.disabled = false;
+            playSound('click');
+        };
+    });
+
+    if (btnFlip1) btnFlip1.onclick = handleFlip;
+    if (btnFlip20) btnFlip20.onclick = handleBatchSimulation;
+    if (btnReset) btnReset.onclick = () => {
+        playSound('click');
+        initGame1();
     };
 };
 
-const bindEvents = () => {
-    if (!ui.btnCara) return;
-    ui.btnCara.onclick = () => selectChoice('cara');
-    ui.btnCruz.onclick = () => selectChoice('cruz');
-    ui.btnFlip1.onclick = handleSingleFlip;
-    ui.btnFlip20.onclick = handleBatchSimulation;
-    ui.btnReset.onclick = resetGame;
-};
+const handleFlip = async () => {
+    if (state.isFlipping || !state.userChoice) return;
 
-const selectChoice = (choice) => {
-    if (gameState.isAnimating) return;
-    gameState.userCurrentChoice = choice;
-    ui.btnCara.classList.toggle('active-selection', choice === 'cara');
-    ui.btnCruz.classList.toggle('active-selection', choice === 'cruz');
-    ui.btnFlip1.disabled = false;
-};
-
-const handleSingleFlip = async () => {
-    if (gameState.isAnimating || !gameState.userCurrentChoice) return;
-
-    // Validación de economía
-    if (!Wallet.hasEnoughChips(gameState.betAmount)) {
+    // Usar apuesta fija o del wallet si existiera selector (aquí 10 por defecto)
+    const validation = Rules.validateBet(Wallet.getBalance(), state.currentBet);
+    if (!validation.isValid) {
+        Wallet.showError("Apuesta no válida", validation.message);
+        playSound('error');
         return;
     }
 
-    gameState.isAnimating = true;
-    ui.btnFlip1.disabled = true;
-    ui.btnFlip20.disabled = true;
+    state.isFlipping = true;
+    Wallet.subtractChips(state.currentBet);
+    playSound('chip_bet');
 
-    const result = ProbEngine.flipCoinPure();
-    gameState.history.push(result);
+    const coinEl = document.getElementById('coin');
+    const result = Probability.flipCoinPure();
+    
+    // Animación de la moneda (Side A: Cara, Side B: Cruz)
+    if (coinEl) {
+        coinEl.classList.remove('animate-heads', 'animate-tails');
+        void coinEl.offsetWidth; // Force reflow
+        coinEl.classList.add(result === 'cara' ? 'animate-heads' : 'animate-tails');
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    if (result === gameState.userCurrentChoice) {
-        gameState.userHits++;
-        Wallet.addChips(gameState.betAmount); // Gana el doble (devuelve apuesta + premio)
+    // Lógica de Ganancia
+    state.history.push(result);
+    const won = state.userChoice === result;
+    if (won) {
+        state.wins++;
+        const prize = state.currentBet * 2;
+        Wallet.addChips(prize);
+        showVictory('La Falacia del Jugador', prize, '🪙');
     } else {
-        gameState.userMisses++;
-        Wallet.subtractChips(gameState.betAmount);
+        state.losses++;
+        playSound('click'); 
     }
 
-    await animateCoin(result);
+    state.isFlipping = false;
     updateUI();
-    gameState.isAnimating = false;
-    ui.btnFlip1.disabled = false;
-    ui.btnFlip20.disabled = false;
+    checkMythBreakdown();
 };
 
 const handleBatchSimulation = () => {
-    if (gameState.isAnimating) return;
-    const batchResults = ProbEngine.simulateBatchFlips(20);
-    gameState.history.push(...batchResults);
+    const batchResults = Probability.simulateBatch(20);
+    state.history.push(...batchResults);
+    
+    playSound('reveal');
     updateUI();
-};
-
-const animateCoin = (result) => {
-    return new Promise((resolve) => {
-        ui.coin.className = 'coin';
-        void ui.coin.offsetWidth; 
-        ui.coin.classList.add(result === 'cara' ? 'animate-flip-cara' : 'animate-flip-cruz');
-        setTimeout(resolve, 1200);
-    });
+    checkMythBreakdown(true);
 };
 
 const updateUI = () => {
-    if (!ui.stats) return;
-    const stats = ProbEngine.calculateCoinStats(gameState.history);
-    ui.stats.total.textContent = stats.total;
-    ui.stats.caras.textContent = stats.caras;
-    ui.stats.cruces.textContent = stats.cruces;
-    ui.stats.percCaras.textContent = `${stats.percCaras}%`;
-    ui.stats.percCruces.textContent = `${stats.percCruces}%`;
-    ui.stats.hits.textContent = gameState.userHits;
-    ui.stats.misses.textContent = gameState.userMisses;
-    ui.timeline.innerHTML = '';
-    gameState.history.slice(-10).forEach(res => {
-        const bubble = document.createElement('div');
-        bubble.className = `timeline-bubble ${res === 'cara' ? 'bubble-cara' : 'bubble-cruz'}`;
-        bubble.textContent = res === 'cara' ? 'C' : 'X';
-        ui.timeline.appendChild(bubble);
-    });
-    if (stats.total >= 15) {
-        ui.conclusion.classList.remove('hidden');
-        ui.conclusion.classList.add('animate-slide-up');
-        ui.conclusionText.innerHTML = `Tras <strong>${stats.total}</strong> lanzamientos... cada tiro es una probabilidad <strong>independiente de 50/50</strong>.`;
+    const statTotal = document.getElementById('stat-total');
+    const statCaras = document.getElementById('stat-caras');
+    const statCruces = document.getElementById('stat-cruces');
+    const percCaras = document.getElementById('perc-caras');
+    const percCruces = document.getElementById('perc-cruces');
+    const statHits = document.getElementById('stat-hits');
+    const statMisses = document.getElementById('stat-misses');
+    const timeline = document.getElementById('sequence-timeline');
+
+    const stats = Probability.calculateStats(state.history);
+    
+    if (statTotal) statTotal.textContent = stats.total;
+    if (statCaras) statCaras.textContent = stats.caraCount;
+    if (statCruces) statCruces.textContent = stats.cruzCount;
+    if (percCaras) percCaras.textContent = `${stats.caraPct}%`;
+    if (percCruces) percCruces.textContent = `${stats.cruzPct}%`;
+    if (statHits) statHits.textContent = state.wins;
+    if (statMisses) statMisses.textContent = state.losses;
+
+    if (timeline) {
+        timeline.innerHTML = '';
+        state.history.slice(-15).forEach(res => {
+            const bubble = document.createElement('div');
+            bubble.className = `timeline-item ${res === 'cara' ? 'is-cara' : 'is-cruz'}`;
+            bubble.textContent = res === 'cara' ? 'C' : 'X';
+            timeline.appendChild(bubble);
+        });
     }
-    Wallet.updateUI();
 };
 
-export const resetGame = () => {
-    gameState = { history: [], userCurrentChoice: null, userHits: 0, userMisses: 0, isAnimating: false, betAmount: 10 };
-    if (ui.conclusion) ui.conclusion.classList.add('hidden');
-    if (ui.btnFlip1) ui.btnFlip1.disabled = true;
-    updateUI();
+const checkMythBreakdown = (isBatch = false) => {
+    const total = state.history.length;
+    const analysisEl = document.getElementById('analysis-text');
+    const conclusionPanel = document.getElementById('game-conclusion');
+    const conclusionText = document.getElementById('conclusion-text');
+    
+    if (total >= 5 && analysisEl) {
+        analysisEl.innerHTML = Probability.getMythBreakdownText();
+    }
+
+    if ((total >= 15 || isBatch) && conclusionPanel && conclusionText) {
+        conclusionPanel.classList.remove('hidden');
+        conclusionText.innerHTML = `Tras ${total} lanzamientos, los porcentajes tienden al <strong>50/50</strong>. 
+        Incluso con rachas previas, la probabilidad del siguiente lanzamiento sigue siendo independiente (0.5). 
+        La moneda "no tiene memoria".`;
+    }
 };

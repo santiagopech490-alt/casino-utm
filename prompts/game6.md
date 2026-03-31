@@ -19,6 +19,7 @@ Simulador interactivo diseñado para dispositivos web que utiliza mecánicas de 
 - **Frecuencia Esperada:** Cálculo de la media estadística mediante $E = n \times p$ (Intentos × 0.05).
 
 ## 4. Interfaz de Usuario (UI) y Experiencia (UX)
+- **Cabecera:** Título del juego y el mito: *"Si compras muchas cajas, seguro obtendrás el objeto legendario."*. Justo debajo, la breve explicación de cómo se rompió este mito mediante la demostración de la independencia de eventos y la probabilidad acumulada (el hecho de que cada caja es un evento nuevo y no garantiza el éxito previo).
 - **Visualización de Cartas:** - Las cartas deben presentarse físicamente con dimensiones de `140x200px`.
   - Animación de entrada: `flipIn` (rotación en el eje Y) con suspense de 60ms entre cada carta.
   - Código de colores:

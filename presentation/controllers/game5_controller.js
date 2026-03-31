@@ -1,202 +1,179 @@
 /**
  * =========================================
- * GAME 5 CONTROLLER - Tómbola de la Suerte
+ * GAME 5 CONTROLLER - Suerte y N° de Intentos
  * =========================================
  */
-
 import { TombolaEngine } from '../../domain/tombola_engine.js';
 import * as Wallet from '../../domain/wallet_manager.js';
+import { playSound } from '../../domain/sound_manager.js';
+import { showVictory } from '../components/victory_modal.js';
 
 let engine = null;
-let ui = {};
-let isSpinning = false;
-let isAutoSpinning = false;
 let autoInterval = null;
-const SPIN_COST = 10;
-const MAX_ATTEMPTS = 100;
-const AUTO_SPEED = 300; // ms entre tiros en modo auto
+let gameState = {
+    isAutoRunning: false,
+    costPerDraw: 10,
+    hasWon: false
+};
+
+let ui = {};
 
 export const initGame5 = () => {
-    engine = new TombolaEngine();
     cacheDOM();
+    if (!ui.container) return;
+
+    engine = new TombolaEngine(0.05, 100);
     bindEvents();
-    updateUI();
+    resetStats();
 };
 
 const cacheDOM = () => {
-    const container = document.querySelector('.game5-layout');
+    const container = document.querySelector('.game-container');
     if (!container) return;
 
     ui = {
-        btnSpin: container.querySelector('#btn-spin-tombola'),
+        container,
+        ball: container.querySelector('#tombola-ball'),
+        ballContent: container.querySelector('#ball-content'),
+        progressBar: container.querySelector('#tombola-progress-bar'),
+        btnManual: container.querySelector('#btn-draw-manual'),
+        btnAutoStart: container.querySelector('#btn-auto-start'),
+        btnAutoStop: container.querySelector('#btn-auto-stop'),
         btnReset: container.querySelector('#btn-reset-tombola'),
-        btnAuto: container.querySelector('#btn-auto-spin'),
-        btnStop: container.querySelector('#btn-stop-auto'),
-        sphere: container.querySelector('#tombola-sphere'),
-        thermoFill: container.querySelector('#thermometer-fill'),
-        attemptCount: container.querySelector('#attempt-count'),
-        log: container.querySelector('#spin-log'),
-        modal: container.querySelector('#game-conclusion'),
-        modalEmoji: container.querySelector('#conclusion-emoji'),
-        modalTitle: container.querySelector('#conclusion-title'),
-        modalText: container.querySelector('#conclusion-text'),
-        btnCloseModal: container.querySelector('#btn-close-conclusion')
+        statAttempts: container.querySelector('#stat-attempts'),
+        log: container.querySelector('#tombola-log'),
+        conclusion: container.querySelector('#game-conclusion'),
+        conclusionText: container.querySelector('#conclusion-text')
     };
 };
 
 const bindEvents = () => {
-    if (ui.btnSpin) ui.btnSpin.onclick = () => handleSpin();
-    if (ui.btnAuto) ui.btnAuto.onclick = startAutoSpin;
-    if (ui.btnStop) ui.btnStop.onclick = stopAutoSpin;
-    if (ui.btnReset) ui.btnReset.onclick = handleReset;
-    if (ui.btnCloseModal) ui.btnCloseModal.onclick = () => ui.modal.classList.add('hidden');
+    ui.btnManual.onclick = handleManualDraw;
+    ui.btnAutoStart.onclick = startAutoDraw;
+    ui.btnAutoStop.onclick = stopAutoDraw;
+    ui.btnReset.onclick = resetStats;
 };
 
-const startAutoSpin = () => {
-    if (isAutoSpinning || isSpinning || engine.attempts >= MAX_ATTEMPTS) return;
-    
-    isAutoSpinning = true;
-    ui.btnAuto.style.display = 'none';
-    ui.btnStop.style.display = 'block';
-    ui.btnSpin.disabled = true;
-
-    autoInterval = setInterval(async () => {
-        const canContinue = await handleSpin(true);
-        if (!canContinue) {
-            stopAutoSpin();
-        }
-    }, AUTO_SPEED);
+const handleManualDraw = async () => {
+    if (gameState.hasWon || engine.attempts >= 100) return;
+    await executeDraw();
 };
 
-const stopAutoSpin = () => {
-    isAutoSpinning = false;
-    if (autoInterval) {
-        clearInterval(autoInterval);
-        autoInterval = null;
-    }
-    if (ui.btnAuto) ui.btnAuto.style.display = 'block';
-    if (ui.btnStop) ui.btnStop.style.display = 'none';
-    if (ui.btnSpin && engine.attempts < MAX_ATTEMPTS) ui.btnSpin.disabled = false;
-};
-
-const handleSpin = async (isAuto = false) => {
-    if (isSpinning || engine.attempts >= MAX_ATTEMPTS) return false;
-
-    // 1. Validar Economía
-    if (!Wallet.hasEnoughChips(SPIN_COST)) {
-        checkGameOver();
+const executeDraw = async () => {
+    if (!Wallet.subtractChips(gameState.costPerDraw)) {
+        playSound('error');
+        stopAutoDraw();
         return false;
     }
 
-    isSpinning = true;
-    if (!isAuto) ui.btnSpin.disabled = true;
-    ui.sphere.classList.add('spinning');
+    playSound('chip_bet');
+    ui.ball.classList.add('shake');
+    ui.ballContent.textContent = "...";
 
-    // Descontar fichas
-    Wallet.subtractChips(SPIN_COST);
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Pequeño delay para la animación
-    // En modo auto el delay es menor para que sea más fluido
-    await new Promise(resolve => setTimeout(resolve, isAuto ? 100 : 600));
+    const result = engine.draw();
+    ui.ball.classList.remove('shake');
 
-    // 2. Ejecutar Lógica
-    const result = engine.spin();
+    if (result.error) {
+        stopAutoDraw();
+        return false;
+    }
 
-    // 3. Actualizar UI
-    ui.sphere.classList.remove('spinning');
-    updateUI(result);
-    addToLog(result);
-
-    let shouldStop = false;
-
-    // 4. Comprobar resultados especiales
-    if (result.resultado === 'ganador') {
-        showConclusion('win', result.intentoActual);
-        showResetButton();
-        shouldStop = true;
-    } else if (engine.attempts >= MAX_ATTEMPTS) {
-        showConclusion('limit', result.intentoActual);
-        showResetButton();
-        shouldStop = true;
+    const logItem = document.createElement('div');
+    if (result.isWin) {
+        gameState.hasWon = true;
+        ui.ball.classList.add('win');
+        ui.ballContent.textContent = "🏆";
+        logItem.className = 'log-item win';
+        logItem.innerHTML = `<span>#${result.attempt}</span> <span>¡GANADOR!</span>`;
+        
+        const prize = 200;
+        Wallet.addChips(prize);
+        showVictory('Tómbola de la Suerte', prize, '🎰', () => {
+            resetVisualsAfterWin();
+        });
+        stopAutoDraw();
+        showConclusion();
     } else {
-        if (Wallet.getBalance() < SPIN_COST) {
-            showConclusion('loss', result.intentoActual);
-            showResetButton();
-            shouldStop = true;
-        }
+        ui.ballContent.textContent = "X";
+        logItem.className = 'log-item loss';
+        logItem.innerHTML = `<span>#${result.attempt}</span> <span>Sigue intentando...</span>`;
+        playSound('click');
     }
 
-    isSpinning = false;
-    if (!isAuto && engine.attempts < MAX_ATTEMPTS) {
-        ui.btnSpin.disabled = false;
-    }
-
-    return !shouldStop;
-};
-
-const handleReset = () => {
-    stopAutoSpin();
-    engine.reset();
-    ui.log.innerHTML = '<p class="empty-log">Aún no has tirado de la tómbola...</p>';
-    ui.btnReset.style.display = 'none';
-    ui.btnSpin.disabled = false;
-    ui.btnSpin.style.display = 'block';
-    ui.btnAuto.style.display = 'block';
+    ui.log.prepend(logItem);
     updateUI();
+
+    if (engine.attempts >= 100 && !gameState.hasWon) {
+        stopAutoDraw();
+        showConclusion();
+    }
+
+    return result.isWin;
 };
 
-const showResetButton = () => {
-    ui.btnSpin.disabled = true;
-    ui.btnSpin.style.display = 'none';
-    ui.btnAuto.style.display = 'none';
-    ui.btnStop.style.display = 'none';
-    ui.btnReset.style.display = 'block';
+const startAutoDraw = () => {
+    if (gameState.hasWon || engine.attempts >= 100) return;
+    gameState.isAutoRunning = true;
+    ui.btnAutoStart.classList.add('hidden');
+    ui.btnAutoStop.classList.remove('hidden');
+    ui.btnManual.disabled = true;
+
+    autoInterval = setInterval(async () => {
+        const won = await executeDraw();
+        if (won || engine.attempts >= 100 || !gameState.isAutoRunning) {
+            stopAutoDraw();
+        }
+    }, 400);
+};
+
+const stopAutoDraw = () => {
+    gameState.isAutoRunning = false;
+    if (autoInterval) clearInterval(autoInterval);
+    ui.btnAutoStart.classList.remove('hidden');
+    ui.btnAutoStop.classList.add('hidden');
+    ui.btnManual.disabled = gameState.hasWon || engine.attempts >= 100;
 };
 
 const updateUI = () => {
-    const attempts = engine.attempts;
-    ui.attemptCount.textContent = attempts;
-    const fillPercent = (attempts / MAX_ATTEMPTS) * 100;
-    ui.thermoFill.style.height = `${fillPercent}%`;
-};
+    ui.statAttempts.textContent = engine.attempts;
+    const progress = (engine.attempts / 100) * 100;
+    ui.progressBar.style.width = `${progress}%`;
+    Wallet.updateUI();
 
-const addToLog = (result) => {
-    const entry = document.createElement('p');
-    entry.className = `log-entry ${result.resultado}`;
-    entry.innerHTML = `Tiro #${result.intentoActual}: <span>${result.resultado === 'ganador' ? '¡GANASTE! 🎁' : 'Nada... ✖'}</span>`;
-    
-    const emptyMsg = ui.log.querySelector('.empty-log');
-    if (emptyMsg) emptyMsg.remove();
-
-    ui.log.prepend(entry);
-};
-
-const showConclusion = (type, attempts) => {
-    ui.modal.classList.remove('hidden');
-    
-    if (type === 'win') {
-        ui.modalEmoji.textContent = '🎁';
-        ui.modalTitle.textContent = '¡Felicidades!';
-        ui.modalTitle.className = 'text-neon-cyan';
-        ui.modalText.innerHTML = `¡Ganaste en el intento <strong>#${attempts}</strong>! <br><br> Recuerda: este tiro solo tenía un <strong>5% de probabilidad</strong>. <br>Cada tiro fue un evento independiente.`;
-    } else if (type === 'limit') {
-        ui.modalEmoji.textContent = '🛑';
-        ui.modalTitle.textContent = 'Límite de Intentos';
-        ui.modalTitle.className = 'text-neon-blue';
-        const probNoGanar = (engine.calculateAccumulatedLossProbability(attempts) * 100).toFixed(2);
-        ui.modalText.innerHTML = `Has alcanzado el límite de <strong>${MAX_ATTEMPTS}</strong> intentos sin éxito. <br><br> Estadísticamente, tenías un <strong>${(100 - probNoGanar).toFixed(2)}%</strong> de probabilidad de ganar al menos una vez, pero el azar es caprichoso.`;
-    } else {
-        ui.modalEmoji.textContent = '📉';
-        ui.modalTitle.textContent = 'Fin de Fichas';
-        ui.modalTitle.className = 'text-neon-red';
-        const probNoGanar = (engine.calculateAccumulatedLossProbability(attempts) * 100).toFixed(2);
-        ui.modalText.innerHTML = `Te has quedado sin fichas tras <strong>${attempts}</strong> intentos. <br><br> La probabilidad de no ganar ni una sola vez tras ${attempts} intentos fue del <strong>${probNoGanar}%</strong>.`;
+    if (gameState.hasWon || engine.attempts >= 100) {
+        ui.btnManual.disabled = true;
+        ui.btnAutoStart.disabled = true;
     }
 };
 
-const checkGameOver = () => {
-    if (Wallet.getBalance() < SPIN_COST && engine.attempts > 0) {
-        showConclusion('loss', engine.attempts);
-        showResetButton();
-    }
+const showConclusion = () => {
+    ui.conclusion.classList.remove('hidden');
+    const msg = gameState.hasWon 
+        ? `<strong>¡Ganaste!</strong> Pero observa: el hecho de que hayas ganado en el intento #${engine.attempts} no significa que tu suerte fuera mejorando.`
+        : `<strong>Sesión Finalizada.</strong> Realizaste 100 intentos con un 5% de probabilidad cada uno y no ganaste.`;
+    
+    ui.conclusionText.innerHTML = msg;
+};
+
+const resetVisualsAfterWin = () => {
+    gameState.hasWon = false;
+    ui.ball.className = 'tombola-ball';
+    ui.ballContent.textContent = "?";
+    ui.btnManual.disabled = false;
+    ui.btnAutoStart.disabled = false;
+};
+
+const resetStats = () => {
+    stopAutoDraw();
+    if (engine) engine.reset();
+    gameState.hasWon = false;
+    ui.ball.className = 'tombola-ball';
+    ui.ballContent.textContent = "?";
+    ui.log.innerHTML = '';
+    ui.conclusion.classList.add('hidden');
+    ui.btnManual.disabled = false;
+    ui.btnAutoStart.disabled = false;
+    updateUI();
 };

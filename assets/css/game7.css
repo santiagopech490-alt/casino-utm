@@ -55,6 +55,14 @@
     transform: scale(1.1);
 }
 
+.number-btn.spinning-highlight {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    transform: scale(1.15);
+    z-index: 10;
+}
+
 .bet-controls {
     display: flex;
     flex-direction: column;

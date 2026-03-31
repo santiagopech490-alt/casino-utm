@@ -13,15 +13,16 @@ const GENERIC_NAMES = [
 
 export class EpidemicEngine {
     constructor(containerWidth = 500, containerHeight = 400) {
-        this.width = containerWidth;
-        this.height = containerHeight;
+        // Asegurar dimensiones mínimas para evitar errores de rebote
+        this.width = Math.max(containerWidth, 400);
+        this.height = Math.max(containerHeight, 300);
         this.nodes = [];
         this.p = 0.5;
         this.baseLimit = 3;
         this.maxContagiosPorRonda = this.baseLimit;
         this.round = 1;
-        this.nodeRadius = 25; // Radio para colisiones
-        this.infectionRadius = 80; // Aumentado para facilitar el contagio con movimiento
+        this.nodeRadius = 25; 
+        this.infectionRadius = 80; 
         this.reset();
     }
 
@@ -30,22 +31,20 @@ export class EpidemicEngine {
         this.round = 1;
         this.maxContagiosPorRonda = this.baseLimit;
         
-        // Copia barajada de nombres para no repetir en la misma tanda si es posible
         const shuffledNames = [...GENERIC_NAMES].sort(() => Math.random() - 0.5);
 
         for (let i = 0; i < 25; i++) {
-            const speedFactor = 0.6;
+            const speedFactor = 0.8;
             this.nodes.push({
                 id: `node-${i}`,
                 nombre: shuffledNames[i % shuffledNames.length],
-                x: Math.random() * (this.width - 60) + 30,
-                y: Math.random() * (this.height - 60) + 30,
+                x: Math.random() * (this.width - 100) + 50,
+                y: Math.random() * (this.height - 100) + 50,
                 vx: (Math.random() - 0.5) * speedFactor,
                 vy: (Math.random() - 0.5) * speedFactor,
                 estado: 'sana'
             });
         }
-        // Un paciente cero
         this.nodes[0].estado = 'contagiada';
     }
 
@@ -54,9 +53,22 @@ export class EpidemicEngine {
             node.x += node.vx;
             node.y += node.vy;
 
-            // Rebote en paredes
-            if (node.x < 5 || node.x > this.width - 55) node.vx *= -1;
-            if (node.y < 5 || node.y > this.height - 55) node.vy *= -1;
+            // Rebote en paredes con márgenes dinámicos
+            if (node.x <= 0) {
+                node.x = 0;
+                node.vx = Math.abs(node.vx);
+            } else if (node.x >= this.width - 60) {
+                node.x = this.width - 60;
+                node.vx = -Math.abs(node.vx);
+            }
+
+            if (node.y <= 0) {
+                node.y = 0;
+                node.vy = Math.abs(node.vy);
+            } else if (node.y >= this.height - 60) {
+                node.y = this.height - 60;
+                node.vy = -Math.abs(node.vy);
+            }
         });
     }
 

@@ -1,24 +1,39 @@
-import * as Rules from '../../domain/game_rules.js';
+/**
+ * =========================================
+ * GAME 3 CONTROLLER - La Carta que Nunca Sale (Refactorizado)
+ * =========================================
+ */
+import * as ProbEngine from '../../domain/probability_engine.js';
 import * as Wallet from '../../domain/wallet_manager.js';
+import { playSound } from '../../domain/sound_manager.js';
+import { showVictory } from '../components/victory_modal.js';
 
 let gameState = {
-    betNumber: null,
+    mode: '1x1', // '1x1' | 'full20'
+    targetNumber: 7,
+    lastTarget: 7,
+    abandonedTarget: null,
     betAmount: 10,
-    history: [],
-    isAnimating: false,
+    hits: 0,
+    missedOpportunities: 0,
+    frequencies: {}, // { number: count }
+    history: [], // Recent results
     gameEnded: false,
-    gridDeck: [],
-    selectedCardIndex: null,
+    deck: []
 };
 
 let ui = {};
 
 export const initGame3 = () => {
     cacheDOM();
-    if (ui.container) {
-        bindEvents();
-        resetGameState();
-    }
+    if (!ui.container) return;
+    
+    // Initialize frequencies
+    for (let i = 1; i <= 20; i++) gameState.frequencies[i] = 0;
+    
+    bindEvents();
+    renderFrequencies();
+    resetBoard();
 };
 
 const cacheDOM = () => {
@@ -27,244 +42,241 @@ const cacheDOM = () => {
 
     ui = {
         container,
-        grid: container.querySelector('#cards-grid'),
-        betInput: container.querySelector('#bet-input'),
-        betAmountInput: container.querySelector('#bet-amount-input'),
-        btnBetPlus: container.querySelector('#btn-bet-plus'),
-        btnBetMinus: container.querySelector('#btn-bet-minus'),
-        btnDraw: container.querySelector('#btn-draw'),
-        btnRiskyBet: container.querySelector('#btn-risky-bet'),
-        historyHotbar: container.querySelector('#history-hotbar'),
-        victoryModal: container.querySelector('#victory-modal'),
-        prizeAmount: container.querySelector('#prize-amount'),
-        btnPlayAgain: container.querySelector('#btn-play-again'),
-        resultCardInner: container.querySelector('#result-card-inner'),
-        resultCardFront: container.querySelector('#result-card-front'),
+        cardsGrid: container.querySelector('#cards-grid'),
+        inputTarget: container.querySelector('#input-target-number'),
+        betDisplay: container.querySelector('#card-bet-display'),
+        btnBetPlus: container.querySelector('#btn-card-bet-plus'),
+        btnBetMinus: container.querySelector('#btn-card-bet-minus'),
+        btnRevealAction: container.querySelector('#btn-reveal-action'),
+        btnRevealAll: container.querySelector('#btn-reveal-all'),
+        btnReset: container.querySelector('#btn-reset-cards'),
+        statHits: container.querySelector('#stat-cards-hits'),
+        statMissed: container.querySelector('#stat-missed-opp'),
+        freqList: container.querySelector('#frequency-list'),
+        hotColdBanner: container.querySelector('#hot-cold-banner'),
+        hotColdText: container.querySelector('#hot-cold-text'),
+        mode1x1: container.querySelector('#btn-mode-1x1'),
+        modeFull20: container.querySelector('#btn-mode-full20'),
+        hintText: container.querySelector('#hint-text'),
+        conclusion: container.querySelector('#game-conclusion'),
+        conclusionText: container.querySelector('#conclusion-text'),
+        btnPlayAgain: container.querySelector('#btn-play-again-cards')
     };
 };
 
 const bindEvents = () => {
-    if (ui.grid) ui.grid.onclick = handleSelectCard;
-    if (ui.btnDraw) ui.btnDraw.onclick = handleDrawCard;
-    if (ui.btnRiskyBet) ui.btnRiskyBet.onclick = handleRiskyBet;
-    if (ui.betInput) ui.betInput.oninput = handleBetInputChange;
-    if (ui.btnBetPlus) ui.btnBetPlus.onclick = () => updateBet(10);
-    if (ui.btnBetMinus) ui.btnBetMinus.onclick = () => updateBet(-10);
-    if (ui.btnPlayAgain) ui.btnPlayAgain.onclick = resetGameState;
+    ui.inputTarget.onchange = (e) => {
+        const val = parseInt(e.target.value);
+        if (val !== gameState.targetNumber) {
+            gameState.abandonedTarget = gameState.targetNumber;
+            gameState.targetNumber = val;
+        }
+        playSound('click');
+    };
+
+    ui.btnBetPlus.onclick = () => changeBet(10);
+    ui.btnBetMinus.onclick = () => changeBet(-10);
+    
+    ui.btnRevealAction.onclick = () => {
+        if (gameState.mode === '1x1') handleDraw1x1();
+        else handleDrawFull20();
+    };
+
+    ui.btnRevealAll.onclick = handleDrawFull20; // Compatibility if needed
+    
+    ui.btnReset.onclick = () => {
+        // Reset stats
+        gameState.hits = 0;
+        gameState.missedOpportunities = 0;
+        for (let i = 1; i <= 20; i++) gameState.frequencies[i] = 0;
+        renderFrequencies();
+        updateUI();
+        resetBoard();
+    };
+
+    ui.mode1x1.onclick = () => setMode('1x1');
+    ui.modeFull20.onclick = () => setMode('full20');
+    
+    if (ui.btnPlayAgain) {
+        ui.btnPlayAgain.onclick = resetBoard;
+    }
 };
 
-const generateGridDeck = () => {
-    gameState.gridDeck = Array.from({ length: 20 }, () => Math.floor(Math.random() * 20) + 1);
+const setMode = (mode) => {
+    gameState.mode = mode;
+    ui.mode1x1.classList.toggle('active', mode === '1x1');
+    ui.modeFull20.classList.toggle('active', mode === 'full20');
+    
+    if (mode === 'full20') {
+        ui.hintText.textContent = "Se generarán 20 resultados simultáneos";
+    } else {
+        ui.hintText.textContent = "Selecciona tu carta y presiona Jugar";
+    }
+    playSound('click');
+    resetBoard();
 };
 
-const renderCardsGrid = () => {
-    if (!ui.grid) return;
-    ui.grid.innerHTML = '';
+const changeBet = (amount) => {
+    const nextBet = gameState.betAmount + amount;
+    if (nextBet >= 10 && nextBet <= 1000) {
+        gameState.betAmount = nextBet;
+        ui.betDisplay.textContent = gameState.betAmount;
+        playSound('click');
+    }
+};
+
+const resetBoard = () => {
+    gameState.gameEnded = false;
+    ui.cardsGrid.classList.add('shuffling');
+    setTimeout(() => ui.cardsGrid.classList.remove('shuffling'), 500);
+    
+    renderInitialCards();
+    checkHotCold();
+    ui.conclusion.classList.add('hidden');
+};
+
+const renderInitialCards = () => {
+    ui.cardsGrid.innerHTML = '';
     for (let i = 0; i < 20; i++) {
         const card = document.createElement('div');
         card.className = 'mini-card';
-        card.dataset.index = i;
-        card.innerHTML = `?`; // Initial back of card look
-        ui.grid.appendChild(card);
+        card.innerHTML = `
+            <div class="mini-card-inner">
+                <div class="mini-card-back"></div>
+                <div class="mini-card-front">?</div>
+            </div>
+        `;
+        ui.cardsGrid.appendChild(card);
     }
 };
 
-const handleBetInputChange = () => {
-    const num = parseInt(ui.betInput.value, 10);
-    const isValid = !isNaN(num) && num >= 1 && num <= 20 && Number.isInteger(parseFloat(ui.betInput.value));
-
-    if (ui.betInput.value !== '' && !isValid) {
-        gameState.betNumber = null;
-        ui.betInput.style.borderColor = '#ff4d4d';
-    } else {
-        gameState.betNumber = isValid ? num : null;
-        ui.betInput.style.borderColor = isValid ? '#ffd700' : '';
-    }
-    setControls(true);
-};
-
-const updateBet = (amount) => {
-    let currentBet = parseInt(ui.betAmountInput.value) + amount;
-    const balance = Wallet.getBalance();
-    if (currentBet < 10) currentBet = 10;
-    if (currentBet > balance) currentBet = balance;
-    if (currentBet > 500) currentBet = 500;
+const handleDraw1x1 = () => {
+    if (gameState.gameEnded) resetBoard();
     
-    ui.betAmountInput.value = currentBet;
-    gameState.betAmount = currentBet;
-};
-
-const handleSelectCard = (event) => {
-    if (gameState.isAnimating || gameState.gameEnded) return;
-
-    const card = event.target.closest('.mini-card');
-    if (!card || card.classList.contains('used')) return;
-
-    const previouslySelected = ui.grid.querySelector('.selected');
-    if (previouslySelected) {
-        previouslySelected.classList.remove('selected');
-    }
-
-    if (previouslySelected !== card) {
-        card.classList.add('selected');
-        gameState.selectedCardIndex = parseInt(card.dataset.index, 10);
-    } else {
-        gameState.selectedCardIndex = null;
-    }
-    
-    setControls(true);
-};
-
-const handleDrawCard = () => {
-    if (gameState.isAnimating || gameState.gameEnded || gameState.selectedCardIndex === null || !gameState.betNumber) return;
-
-    // Validación de economía con modal centralizado
-    if (!Wallet.hasEnoughChips(gameState.betAmount)) {
-        return;
-    }
-
-    gameState.isAnimating = true;
-    setControls(false);
-    Wallet.subtractChips(gameState.betAmount);
-
-    const cardIndex = gameState.selectedCardIndex;
-    const revealedNumber = gameState.gridDeck[cardIndex];
-    const won = revealedNumber === gameState.betNumber;
-
-    ui.resultCardFront.textContent = revealedNumber;
-    ui.resultCardInner.classList.add('is-flipped');
-
-    const gridCard = ui.grid.querySelector(`.mini-card[data-index='${cardIndex}']`);
-    gridCard.classList.remove('selected');
-    gridCard.classList.add('used');
-    gridCard.textContent = revealedNumber; // Show number on used card
-
-    if (won) {
-        gameState.gameEnded = true;
-        const prize = gameState.betAmount * 2;
-        Wallet.addChips(prize);
-        ui.resultCardFront.classList.add('win');
-        setTimeout(() => endGame(prize, `¡Enhorabuena! Ganaste <strong>${prize}</strong> fichas.`), 1500);
-    } else {
-        gameState.history.push(revealedNumber);
-        updateHotbar();
-        ui.resultCardFront.classList.add('loss');
-
-        setTimeout(() => {
-            ui.resultCardInner.classList.remove('is-flipped');
-            ui.resultCardFront.classList.remove('loss');
-            gameState.isAnimating = false;
-            gameState.selectedCardIndex = null;
-            setControls(true);
-        }, 2000);
-    }
-    updateUI();
-};
-
-const handleRiskyBet = () => {
-    if (gameState.isAnimating || gameState.gameEnded || !gameState.betNumber) return;
-
-    const cost = gameState.betAmount * 2;
-    
-    // Validación de economía con modal centralizado
-    if (!Wallet.hasEnoughChips(cost)) {
-        return;
-    }
-
-    gameState.isAnimating = true;
+    // Draw one number
+    const result = Math.floor(Math.random() * 20) + 1;
     gameState.gameEnded = true;
-    setControls(false);
-    Wallet.subtractChips(cost);
 
-    const won = gameState.gridDeck.includes(gameState.betNumber);
+    // Process result
+    processResult(result, 0); // 0 is the card index to reveal (middle one or first one)
     
-    ui.grid.querySelectorAll('.mini-card').forEach((card, index) => {
-        const number = gameState.gridDeck[index];
-        card.textContent = number;
-        card.classList.add('used');
-        if (number === gameState.betNumber) {
-            card.classList.add('win');
-        }
-    });
+    // Visual: flip only one card (e.g. the first one for simplicity or a random one)
+    const cards = ui.cardsGrid.querySelectorAll('.mini-card');
+    const randomIndex = Math.floor(Math.random() * 20);
+    revealCard(cards[randomIndex], result, result === gameState.targetNumber);
+};
 
-    if (won) {
-        const prize = gameState.betAmount * 3;
-        Wallet.addChips(prize);
-        setTimeout(() => endGame(prize, `¡Tu número estaba! Ganaste <strong>${prize}</strong> fichas.`), 2000);
-    } else {
-        setTimeout(() => endGame(0, "Tu número no estaba en la baraja."), 2000);
+const handleDrawFull20 = () => {
+    if (gameState.gameEnded) resetBoard();
+    
+    gameState.gameEnded = true;
+    const results = ProbEngine.generateDeck(20, 1, 20);
+    const cards = ui.cardsGrid.querySelectorAll('.mini-card');
+    let batchHits = 0;
+
+    results.forEach((res, i) => {
+        setTimeout(() => {
+            const isWin = res === gameState.targetNumber;
+            revealCard(cards[i], res, isWin);
+            
+            // Actualizar lógica interna
+            gameState.frequencies[res]++;
+            gameState.history.push(res);
+            if (gameState.history.length > 100) gameState.history.shift();
+
+            if (isWin) {
+                batchHits++;
+                gameState.hits++;
+                Wallet.addChips(10);
+            } else {
+                Wallet.subtractChips(10);
+            }
+
+            // Al llegar a la última carta del lote
+            if (i === 19) {
+                updateUI();
+                renderFrequencies();
+                if (batchHits > 0) {
+                    setTimeout(() => {
+                        showVictory('¡Número Encontrado!', 10 * batchHits, '🃏', () => {
+                            // Al cerrar el modal, NO reseteamos nada del estado persistente
+                        });
+                    }, 500);
+                }
+            }
+        }, i * 50);
+    });
+};
+
+const revealCard = (el, val, isWin) => {
+    const front = el.querySelector('.mini-card-front');
+    front.textContent = val;
+    front.classList.add(isWin ? 'win' : 'loss');
+    el.classList.add('is-flipped');
+    playSound(isWin ? 'victory' : 'miss');
+};
+
+const processResult = (result, index, isBatch = false) => {
+    if (isBatch) return; // Full 20 se gestiona en su propia función
+
+    // Update Frequencies (PERSISTENT)
+    gameState.frequencies[result]++;
+    gameState.history.push(result);
+    if (gameState.history.length > 100) gameState.history.shift();
+    
+    // Check Missed Opportunity
+    if (gameState.abandonedTarget === result) {
+        gameState.missedOpportunities++;
+        gameState.abandonedTarget = null;
+        playSound('error');
     }
 
-    updateUI();
+    // Economy
+    if (result === gameState.targetNumber) {
+        gameState.hits++;
+        Wallet.addChips(10);
+        updateUI();
+        renderFrequencies();
+        showVictory('¡Acierto!', 10, '🃏', () => {
+            // No resetear aquí automáticamente
+        });
+    } else {
+        Wallet.subtractChips(10);
+        updateUI();
+        renderFrequencies();
+    }
 };
 
-const updateHotbar = () => {
-    if (!ui.historyHotbar) return;
-    ui.historyHotbar.innerHTML = '';
-    const last5 = gameState.history.slice(-5);
-    last5.forEach(num => {
-        const card = document.createElement('div');
-        card.className = 'hotbar-card loss';
-        card.textContent = num;
-        ui.historyHotbar.appendChild(card);
-    });
+const checkHotCold = () => {
+    // No limpiar el banner si no es necesario, solo actualizarlo basado en el historial persistente
+    const coldNumbers = [];
+    for (let i = 1; i <= 20; i++) {
+        if (!gameState.history.slice(-20).includes(i)) {
+            coldNumbers.push(i);
+        }
+    }
+
+    if (coldNumbers.length > 0) {
+        const selected = coldNumbers[Math.floor(Math.random() * coldNumbers.length)];
+        ui.hotColdBanner.classList.remove('hidden');
+        ui.hotColdText.innerHTML = `🔥 ¡La carta <strong>${selected}</strong> no ha salido! Si la eliges ahora, tus aciertos valen x2.`;
+    } else {
+        ui.hotColdBanner.classList.add('hidden');
+    }
 };
 
-const endGame = (prize, message) => {
-    if (ui.prizeAmount) ui.prizeAmount.textContent = prize;
-    const p = ui.victoryModal.querySelector('p');
-    if (p) p.innerHTML = message;
-    const h2 = ui.victoryModal.querySelector('h2');
-    if (h2) h2.textContent = prize > 0 ? "¡Has Ganado!" : "Fin de la Ronda";
-
-    if (ui.victoryModal) ui.victoryModal.style.display = 'flex';
+const renderFrequencies = () => {
+    ui.freqList.innerHTML = '';
+    for (let i = 1; i <= 20; i++) {
+        const item = document.createElement('div');
+        item.className = 'freq-item';
+        item.innerHTML = `№${i}<span class="val">${gameState.frequencies[i]}</span>`;
+        ui.freqList.appendChild(item);
+    }
 };
 
 const updateUI = () => {
+    ui.statHits.textContent = gameState.hits;
+    ui.statMissed.textContent = gameState.missedOpportunities;
     Wallet.updateUI();
-};
-
-const setControls = (enabled) => {
-    const canPlay = enabled && !gameState.gameEnded;
-    const hasBetNumber = gameState.betNumber !== null;
-    const hasSelectedCard = gameState.selectedCardIndex !== null;
-
-    if (ui.btnDraw) ui.btnDraw.disabled = !canPlay || !hasBetNumber || !hasSelectedCard;
-    if (ui.btnRiskyBet) ui.btnRiskyBet.disabled = !canPlay || !hasBetNumber;
-    if (ui.betInput) ui.betInput.disabled = !canPlay;
-    if (ui.btnBetPlus) ui.btnBetPlus.disabled = !canPlay;
-    if (ui.btnBetMinus) ui.btnBetMinus.disabled = !canPlay;
-    
-    ui.grid.style.pointerEvents = canPlay ? 'auto' : 'none';
-};
-
-const resetGameState = () => {
-    gameState = {
-        betNumber: null,
-        betAmount: 10,
-        history: [],
-        isAnimating: false,
-        gameEnded: false,
-        gridDeck: [],
-        selectedCardIndex: null,
-    };
-    
-    if (ui.betInput) {
-        ui.betInput.value = '';
-        ui.betInput.style.borderColor = '';
-    }
-    if (ui.betAmountInput) ui.betAmountInput.value = 10;
-    if (ui.victoryModal) ui.victoryModal.style.display = 'none';
-
-    if (ui.resultCardInner) ui.resultCardInner.classList.remove('is-flipped');
-    if (ui.resultCardFront) {
-        ui.resultCardFront.classList.remove('win', 'loss');
-        ui.resultCardFront.textContent = '--';
-    }
-    
-    generateGridDeck();
-    renderCardsGrid();
-    updateHotbar();
-    setControls(true);
-    updateUI();
 };

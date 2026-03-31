@@ -1,163 +1,340 @@
 /**
  * =========================================
- * CSS JUEGO 6: GACHA CARD SIMULATOR
+ * CSS JUEGO 6: GACHA CARD SIMULATOR (ZZZ STYLE)
+ * Estética Urbano-Retro-Futurista
  * =========================================
  */
+
+/* Variables de Colores Neon */
+:root {
+    --neon-gold: #f59e0b;
+    --neon-purple: #a855f7;
+    --neon-blue: #3b82f6;
+    --neon-red: #ff4d4d;
+    --neon-green: #00ff88;
+    --terminal-bg: #0a0a0c;
+    --card-bg: #1e293b;
+}
 
 .game6-layout {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 30px;
     width: 100%;
+    background-color: var(--terminal-bg);
+    padding: 20px;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Geist', 'Inter', sans-serif;
 }
 
-.text-neon-gold { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
-.text-neon-purple { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
+/* Colores de Texto Neon */
+.text-neon-gold { color: var(--neon-gold); text-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+.text-neon-purple { color: var(--neon-purple); text-shadow: 0 0 8px rgba(168, 85, 247, 0.4); }
+.text-neon-red { color: var(--neon-red); text-shadow: 0 0 8px rgba(255, 77, 77, 0.4); }
+.text-neon-blue { color: var(--neon-blue); text-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
 
-/* Dashboard */
-.gacha-dashboard {
+/* Dashboard Terminal */
+.terminal-panel {
     display: flex;
     justify-content: space-around;
-    padding: 20px;
-    text-align: center;
-}
-
-.dash-item { display: flex; flex-direction: column; gap: 5px; }
-.dash-label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
-.dash-value { font-size: 1.8rem; }
-
-/* Shop Section */
-.gacha-shop-section {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-}
-
-.shop-card {
-    flex: 1;
-    max-width: 300px;
-    padding: 25px;
-    text-align: center;
-    position: relative;
-    transition: transform 0.3s ease;
-}
-
-.shop-card:hover { transform: translateY(-5px); }
-.shop-card.featured { border-color: #a855f7; background: rgba(168, 85, 247, 0.05); }
-
-.promo-badge {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    background: #ff4d4d;
-    color: white;
-    padding: 4px 10px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4);
+    font-family: 'Consolas', monospace;
 }
 
-.price-tag {
-    font-size: 1.4rem;
-    color: #00ff88;
-    margin: 15px 0;
-    font-weight: bold;
+.dash-item { display: flex; flex-direction: column; align-items: center; }
+.dash-label { font-size: 0.7rem; color: #666; letter-spacing: 1px; }
+.dash-value { font-size: 1.5rem; font-weight: bold; }
+
+/* TV Pile Area */
+.gacha-main-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
 }
 
-/* Gacha Grid */
-.gacha-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 140px);
-    gap: 20px;
+.tv-pile-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: 300px;
+    display: flex;
     justify-content: center;
-    padding: 20px;
-    min-height: 300px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 20px;
+    align-items: flex-end;
 }
 
-.empty-state {
-    grid-column: 1 / -1;
+/* CRT Screen Base */
+.crt {
+    background: #000;
+    border: 10px solid #222;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.05);
+}
+
+.crt::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+.tv-main-screen {
+    width: 320px;
+    height: 240px;
+    z-index: 5;
+}
+
+.tv-deco {
+    width: 150px;
+    height: 120px;
+    position: absolute;
+    bottom: 0;
+}
+
+.tv-deco.left { left: 0; transform: rotate(-5deg); }
+.tv-deco.right { right: 0; transform: rotate(5deg); }
+
+.tv-inner-content {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #555;
-    font-style: italic;
+    text-align: center;
+    position: relative;
 }
 
-/* Card Styling */
+.status-glitch {
+    font-family: 'Consolas', monospace;
+    font-size: 1.2rem;
+    color: var(--neon-green);
+    text-transform: uppercase;
+    animation: textFlicker 3s infinite;
+}
+
+.static-layer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url('https://media.giphy.com/media/oEI9uWUicKgR2/giphy.gif'); /* Placeholder para estática */
+    background-size: cover;
+    opacity: 0.3;
+    mix-blend-mode: screen;
+}
+
+/* Shop Section Neon */
+.gacha-shop-section {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.neon-card {
+    background: rgba(20, 20, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    width: 220px;
+    border-radius: 4px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neon-card:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.neon-card.featured { border-color: var(--neon-purple); }
+
+.price-tag {
+    font-family: 'Consolas', monospace;
+    font-size: 1.4rem;
+    color: var(--neon-green);
+    margin: 10px 0;
+}
+
+/* Buttons Neon */
+.neon-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid;
+    transition: 0.2s;
+}
+
+.gold-btn { border-color: var(--neon-gold); color: var(--neon-gold); }
+.gold-btn:hover { background: var(--neon-gold); color: #000; box-shadow: 0 0 20px var(--neon-gold); }
+
+.purple-btn { border-color: var(--neon-purple); color: var(--neon-purple); }
+.purple-btn:hover { background: var(--neon-purple); color: #000; box-shadow: 0 0 20px var(--neon-purple); }
+
+.red-btn { border-color: var(--neon-red); color: var(--neon-red); }
+.red-btn:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px var(--neon-red); }
+
+/* Results Container (Grid Responsivo tipo ZZZ) */
+.results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 140px);
+    grid-auto-rows: min-content;
+    gap: 20px;
+    justify-content: center;
+    padding: 40px 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon-purple) transparent;
+}
+
+/* Card Gacha - ZZZ Style */
 .gacha-card {
     width: 140px;
     height: 200px;
+    position: relative;
     perspective: 1000px;
-    animation: flipIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    flex-shrink: 0; /* Evitar que se colapsen */
 }
 
 .card-inner {
     width: 100%;
     height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    border-radius: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #1e293b;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 .card-rarity-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-bottom: 10px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 2px 5px;
+    background: rgba(0,0,0,0.5);
 }
 
-.card-icon { font-size: 3rem; margin: 15px 0; }
-.card-roll { font-size: 0.8rem; color: #64748b; font-family: monospace; }
+.card-icon { font-size: 2.5rem; margin-bottom: 10px; }
+.card-roll { font-family: 'Consolas', monospace; font-size: 0.7rem; color: #555; }
 
-/* Rarity Colors */
-.card-L .card-inner { border-color: #f59e0b; background: linear-gradient(135deg, #451a03, #1e293b); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); animation: legendaryGlow 2s infinite alternate; }
-.card-L .card-rarity-label { color: #f59e0b; }
-
-.card-E .card-inner { border-color: #a855f7; background: linear-gradient(135deg, #2e1065, #1e293b); }
-.card-E .card-rarity-label { color: #a855f7; }
-
-.card-R .card-inner { border-color: #3b82f6; background: linear-gradient(135deg, #172554, #1e293b); }
-.card-R .card-rarity-label { color: #3b82f6; }
-
-.card-C .card-inner { border-color: #94a3b8; }
-.card-C .card-rarity-label { color: #94a3b8; }
-
-@keyframes flipIn {
-    from { transform: rotateY(90deg); opacity: 0; }
-    to { transform: rotateY(0deg); opacity: 1; }
+/* Card Rarities */
+.card-L .card-inner { border-color: var(--neon-gold); border-width: 2px; }
+.card-L .card-inner::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    box-shadow: inset 0 0 20px var(--neon-gold);
+    animation: glowPulse 2s infinite;
 }
 
-@keyframes legendaryGlow {
-    from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
-    to { box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); }
+.card-E .card-inner { border-color: var(--neon-purple); }
+.card-R .card-inner { border-color: var(--neon-blue); }
+
+/* System Error Modal */
+.system-error-panel {
+    background: #111;
+    border: 2px solid var(--neon-red);
+    box-shadow: 0 0 40px rgba(255, 77, 77, 0.3);
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    text-align: center;
 }
 
-/* Education Modal */
-.edu-stats-box {
-    background: rgba(0, 0, 0, 0.3);
+.error-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; }
+.error-icon { font-size: 2rem; color: var(--neon-red); }
+
+.terminal-stats-box {
+    background: #050505;
     padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
+    border-left: 4px solid var(--neon-red);
     text-align: left;
     font-family: 'Consolas', monospace;
-    line-height: 1.6;
+    color: var(--neon-red);
+    margin-bottom: 25px;
+    font-size: 0.9rem;
 }
 
-.stat-line { margin-bottom: 10px; display: block; }
-.stat-line strong { color: #00ff88; }
-
-.edu-lesson {
-    color: #cbd5e1;
-    font-style: italic;
+.edu-lesson-box {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
     margin-bottom: 25px;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Animations */
+@keyframes textFlicker {
+    0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; }
+    20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.4; }
+}
+
+@keyframes glowPulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+/* ZZZ Reveal Animation */
+.zoom-impact {
+    animation: zzzZoom 0.8s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+@keyframes zzzZoom {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.5); filter: brightness(2); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Glitch Text Effect */
+.glitch-text {
+    position: relative;
+    display: inline-block;
+}
+
+.glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+.glitch-text::before { left: 2px; text-shadow: -2px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0); animation: glitch-1 5s infinite linear alternate-reverse; }
+.glitch-text::after { left: -2px; text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1; animation: glitch-2 1s infinite linear alternate-reverse; }
+
+@keyframes glitch-1 {
+  0% { clip: rect(132px, 1000px, 101px, 0); }
+  100% { clip: rect(65px, 1000px, 119px, 0); }
+}
+
+@keyframes glitch-2 {
+  0% { clip: rect(121px, 1000px, 155px, 0); }
+  100% { clip: rect(13px, 1000px, 124px, 0); }
 }
