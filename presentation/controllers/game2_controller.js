@@ -83,8 +83,12 @@ const handleSpin = async () => {
     const resultNum = document.getElementById('result-number');
     const resultColorTxt = document.getElementById('result-color-text');
     
-    const spins = 5 + Math.floor(Math.random() * 5);
-    state.rotation += (spins * 360) + Math.floor(Math.random() * 360);
+    // Calcular rotación precisa para caer en el CENTRO del segmento
+    const spins = 8 + Math.floor(Math.random() * 5); 
+    const degPerSegment = 360 / 37;
+    // landingRotation apunta al INICIO del segmento. Sumamos medio segmento para caer al CENTRO.
+    const landingRotation = (result.number * degPerSegment) + (degPerSegment / 2);
+    state.rotation += (spins * 360) - (state.rotation % 360) - landingRotation;
     
     if (wheel) {
         wheel.style.transform = `rotate(${state.rotation}deg)`;
@@ -97,7 +101,7 @@ const handleSpin = async () => {
     if (resultNum) resultNum.textContent = result.number;
     if (resultColorTxt) {
         resultColorTxt.textContent = result.color.toUpperCase();
-        resultColorTxt.style.color = result.color === 'verde' ? '#2ecc71' : (result.color === 'rojo' ? '#e74c3c' : '#ccc');
+        resultColorTxt.style.color = result.color === 'verde' ? '#00ff88' : (result.color === 'rojo' ? '#ff4d4d' : '#ffffff');
     }
 
     const payout = Probability.calculatePayout(state.currentBet, state.selectedColor, result.color);

@@ -11,7 +11,7 @@ import { showVictory } from '../components/victory_modal.js';
 let engine = null;
 let animationId = null;
 let gameState = {
-    selectedNodeId: null,
+    selectedNodeIds: [], // Cambiado a array para selección múltiple
     betAmount: 10,
     rounds: 1,
     isProcessingRound: false
@@ -96,7 +96,7 @@ const renderNodes = () => {
         }
         nodeEl.style.left = `${node.x}px`;
         nodeEl.style.top = `${node.y}px`;
-        nodeEl.className = `ep-node ${node.estado} ${gameState.selectedNodeId === node.id ? 'selected' : ''}`;
+        nodeEl.className = `ep-node ${node.estado} ${gameState.selectedNodeIds.includes(node.id) ? 'selected' : ''}`;
     });
 
     ui.statHealthy.textContent = nodes.filter(n => n.estado === 'sana').length;
@@ -106,9 +106,21 @@ const renderNodes = () => {
 const selectNode = (node) => {
     if (gameState.isProcessingRound || node.estado === 'contagiada') return;
     playSound('click');
-    gameState.selectedNodeId = node.id;
-    ui.nodeName.textContent = node.nombre;
-    ui.btnNextRound.disabled = false;
+    
+    const index = gameState.selectedNodeIds.indexOf(node.id);
+    if (index > -1) {
+        gameState.selectedNodeIds.splice(index, 1);
+    } else {
+        gameState.selectedNodeIds.push(node.id);
+    }
+
+    if (gameState.selectedNodeIds.length > 0) {
+        ui.nodeName.textContent = `${gameState.selectedNodeIds.length} seleccionados`;
+        ui.btnNextRound.disabled = false;
+    } else {
+        ui.nodeName.textContent = "Ninguno";
+        ui.btnNextRound.disabled = true;
+    }
 };
 
 const changeBet = (amount) => {
@@ -122,10 +134,14 @@ const changeBet = (amount) => {
 };
 
 const handleNextRound = async () => {
-    if (gameState.isProcessingRound || !gameState.selectedNodeId) return;
+    if (gameState.isProcessingRound || gameState.selectedNodeIds.length === 0) return;
 
-    if (!Wallet.subtractChips(gameState.betAmount)) {
+    // La apuesta es por cada persona seleccionada
+    const totalBet = gameState.betAmount * gameState.selectedNodeIds.length;
+
+    if (!Wallet.subtractChips(totalBet)) {
         playSound('error');
+        alert(`Saldo insuficiente para apostar por ${gameState.selectedNodeIds.length} personas (${totalBet} fichas).`);
         return;
     }
 
@@ -134,22 +150,21 @@ const handleNextRound = async () => {
     playSound('chip_bet');
 
     const newlyInfectedIds = engine.nextRound();
-    const targetNode = engine.nodes.find(n => n.id === gameState.selectedNodeId);
-
-    const resultItem = document.createElement('div');
-    const isNowInfected = newlyInfectedIds.includes(gameState.selectedNodeId);
+    const infectedSelected = gameState.selectedNodeIds.filter(id => newlyInfectedIds.includes(id));
     
-    if (isNowInfected) {
+    const resultItem = document.createElement('div');
+    
+    if (infectedSelected.length > 0) {
         resultItem.className = 'result-item win';
-        resultItem.textContent = `R${engine.round-1}: ${targetNode.nombre} se contagió. ¡Ganaste!`;
-        const prize = gameState.betAmount * 4;
+        resultItem.textContent = `R${engine.round-1}: ${infectedSelected.length} de tus elegidos se contagiaron. ¡Ganaste!`;
+        const prize = gameState.betAmount * 4 * infectedSelected.length;
         Wallet.addChips(prize);
         showVictory('Contagio en el Salón', prize, '🧬', () => {
-            resetVisuals();
+            clearContagionVisuals();
         });
     } else {
         resultItem.className = 'result-item loss';
-        resultItem.textContent = `R${engine.round-1}: ${targetNode.nombre} sigue sano.`;
+        resultItem.textContent = `R${engine.round-1}: Ninguno de tus elegidos se contagió.`;
         playSound('miss');
     }
 
@@ -166,12 +181,27 @@ const handleNextRound = async () => {
 
 const updateUI = () => {
     Wallet.updateUI();
-    if (gameState.selectedNodeId) {
-        const node = engine.nodes.find(n => n.id === gameState.selectedNodeId);
-        if (node && node.estado === 'contagiada') {
-            resetVisuals();
-        }
+    // Limpiar IDs de nodos que ya se contagiaron
+    gameState.selectedNodeIds = gameState.selectedNodeIds.filter(id => {
+        const node = engine.nodes.find(n => n.id === id);
+        return node && node.estado === 'sana';
+    });
+
+    if (gameState.selectedNodeIds.length > 0) {
+        ui.nodeName.textContent = `${gameState.selectedNodeIds.length} seleccionados`;
+        ui.btnNextRound.disabled = false;
+    } else {
+        ui.nodeName.textContent = "Ninguno";
+        ui.btnNextRound.disabled = true;
     }
+};
+
+const clearContagionVisuals = () => {
+    // Solo limpiamos los que ya están contagiados de la selección
+    gameState.selectedNodeIds = gameState.selectedNodeIds.filter(id => {
+        const node = engine.nodes.find(n => n.id === id);
+        return node && node.estado === 'sana';
+    });
 };
 
 const showConclusion = () => {
@@ -183,7 +213,7 @@ const showConclusion = () => {
 };
 
 const resetVisuals = () => {
-    gameState.selectedNodeId = null;
+    gameState.selectedNodeIds = [];
     ui.nodeName.textContent = "Ninguno";
     ui.btnNextRound.disabled = true;
 };
@@ -193,7 +223,7 @@ const resetStats = () => {
     gameState.rounds = 1;
     gameState.isProcessingRound = false;
     
-    ui.canvas.innerHTML = '<div id="simulation-overlay" class="simulation-overlay"><p id="overlay-msg">Selecciona a una persona sana para apostar</p></div>';
+    ui.canvas.innerHTML = '<div id="simulation-overlay" class="simulation-overlay"><p id="overlay-msg">Selecciona a personas sanas para apostar</p></div>';
     ui.resultsList.innerHTML = '';
     ui.statRound.textContent = "1";
     ui.conclusion.classList.add('hidden');

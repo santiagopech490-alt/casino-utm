@@ -7,24 +7,22 @@
 **Tarea:** Implementar un simulador de mazo de 20 cartas con reposición total, siguiendo estas especificaciones:
 
 ### 1. Lógica de Sorteo y Aleatoriedad
-*   **Reposición Total:** Las cartas salen con reposición (pueden repetirse y algunas pueden no aparecer).
 *   **Modos de Robo:**
-    *   **1x1:** El usuario selecciona su carta (1-20) y se genera un resultado único.
-    *   **Full 20:** El usuario selecciona una carta y se generan 20 resultados simultáneos.
+    *   **1x1 (Con Reposición):** El usuario selecciona su carta (1-20) y se genera un resultado único con reposición total (la misma carta puede salir varias veces seguidas).
+    *   **Full 20 (Sin Reposición):** Se genera un mazo completo de 20 cartas únicas (1-20) barajadas. Esto sirve para contrastar la distribución perfecta frente a la aleatoriedad con reposición.
 
 ### 2. Sistema de Incentivos (Psicología)
-*   **Algoritmo Hot/Cold:** Detectar cartas que no han salido en las últimas rondas (ej. últimas 20 tiradas) y mostrar un banner visual: "¡Esta carta no ha salido! Si la eliges ahora, tus aciertos valen x2".
-*   **Contador de Oportunidad Perdida:** Rastrear si el usuario cambió su elección y, en el siguiente tiro, salió la carta que acababa de abandonar. Incrementar un contador visual.
+*   **Algoritmo Hot/Cold:** Detectar cartas que no han salido en las últimas rondas de modo 1x1 y mostrar un banner visual: "¡Esta carta no ha salido! Si la eliges ahora, tus aciertos valen x2".
+*   **Contador de Oportunidad Perdida:** Rastrear si el usuario cambió su elección y, en el siguiente tiro 1x1, salió la carta que acababa de abandonar.
 
 ### 3. Economía y Atributos Visuales
 *   **Fichas:** Saldo inicial 1000. Regla fija: Acierto = +10, Fallo = -10.
 *   **Interfaz:**
-    *   **Cabecera:** Título del juego y el mito: *"Si una carta no ha salido en mucho tiempo, ahora es más probable."*. Justo debajo, una breve explicación de cómo se rompió este mito (Falacia del Jugador) explicando la independencia de los eventos en un mazo con reposición total.
-    *   **Animación:** Efecto visual de "flip" 3D y animación de barajado (shuffle) al reiniciar el tablero.
-    *   **Frecuencímetro:** Tabla dinámica que muestre cuántas veces ha salido cada una de las 20 cartas.
-    *   **Marcadores:** Contador de aciertos totales y contador de "oportunidades perdidas" (pérdidas por cambio de carta).
+    *   **Cabecera:** Título del juego y el mito: *"Si una carta no ha salido en mucho tiempo, ahora es más probable."*. Explicación de la Falacia del Jugador.
+    *   **Animación:** Efecto visual de "flip" 3D y animación de barajado.
+    *   **Frecuencímetro:** Tabla dinámica que muestre cuántas veces ha salido cada una de las 20 cartas (acumulado de todas las sesiones).
+    *   **Marcadores:** Contador de aciertos totales y contador de "oportunidades perdidas".
 
 ### Requisitos Técnicos:
-*   **Controller:** `presentation/controllers/game3_controller.js` debe gestionar el estado de frecuencias, historia reciente y rastreo de cambios de carta.
-*   **View:** `presentation/views/game3_cartas.html` debe incluir el selector de modo, el frecuencímetro y los banners de incentivos.
-*   **CSS:** `assets/css/game3.css` debe implementar la animación de flip y los estilos para el frecuencímetro en rejilla.
+*   **Controller:** `presentation/controllers/game3_controller.js` gestiona frecuencias y estados. El modo Full 20 debe garantizar que no se repitan números.
+*   **View:** `presentation/views/game3_cartas.html` selector de modo y frecuencímetro. Sin botón de "intentar de nuevo" redundante.

@@ -32,29 +32,48 @@
     height: 100%;
     border-radius: 50%;
     border: 12px solid #222;
+    /* Mapeo Real de 37 segmentos (100/37 = 2.7027%) */
     background: conic-gradient(
-        #008000 0% 2.7%,
-        #e61e1e 2.7% 8.1%,
-        #1a1a1a 8.1% 13.5%,
-        #e61e1e 13.5% 18.9%,
-        #1a1a1a 18.9% 24.3%,
-        #e61e1e 24.3% 29.7%,
-        #1a1a1a 29.7% 35.1%,
-        #e61e1e 35.1% 40.5%,
-        #1a1a1a 40.5% 45.9%,
-        #e61e1e 45.9% 51.3%,
-        #1a1a1a 51.3% 56.7%,
-        #e61e1e 56.7% 62.1%,
-        #1a1a1a 62.1% 67.5%,
-        #e61e1e 67.5% 72.9%,
-        #1a1a1a 72.9% 78.3%,
-        #e61e1e 78.3% 83.7%,
-        #1a1a1a 83.7% 89.1%,
-        #e61e1e 89.1% 94.5%,
-        #1a1a1a 94.5% 100%
+        #008000 0% 2.7%,       /* 0: Verde */
+        #e61e1e 2.7% 5.4%,     /* 1: Rojo */
+        #1a1a1a 5.4% 8.1%,     /* 2: Negro */
+        #e61e1e 8.1% 10.8%,    /* 3: Rojo */
+        #1a1a1a 10.8% 13.5%,   /* 4: Negro */
+        #e61e1e 13.5% 16.2%,   /* 5: Rojo */
+        #1a1a1a 16.2% 18.9%,   /* 6: Negro */
+        #e61e1e 18.9% 21.6%,   /* 7: Rojo */
+        #1a1a1a 21.6% 24.3%,   /* 8: Negro */
+        #e61e1e 24.3% 27.0%,   /* 9: Rojo */
+        #1a1a1a 27.0% 29.7%,   /* 10: Negro */
+        #e61e1e 29.7% 32.4%,   /* 11: Rojo */
+        #1a1a1a 32.4% 35.1%,   /* 12: Negro */
+        #e61e1e 35.1% 37.8%,   /* 13: Rojo */
+        #1a1a1a 37.8% 40.5%,   /* 14: Negro */
+        #e61e1e 40.5% 43.2%,   /* 15: Rojo */
+        #1a1a1a 43.2% 45.9%,   /* 16: Negro */
+        #e61e1e 45.9% 48.6%,   /* 17: Rojo */
+        #1a1a1a 48.6% 51.3%,   /* 18: Negro */
+        #e61e1e 51.3% 54.0%,   /* 19: Rojo */
+        #1a1a1a 54.0% 56.7%,   /* 20: Negro */
+        #e61e1e 56.7% 59.4%,   /* 21: Rojo */
+        #1a1a1a 59.4% 62.1%,   /* 22: Negro */
+        #e61e1e 62.1% 64.8%,   /* 23: Rojo */
+        #1a1a1a 64.8% 67.5%,   /* 24: Negro */
+        #e61e1e 67.5% 70.2%,   /* 25: Rojo */
+        #1a1a1a 70.2% 72.9%,   /* 26: Negro */
+        #e61e1e 72.9% 75.6%,   /* 27: Rojo */
+        #1a1a1a 75.6% 78.3%,   /* 28: Negro */
+        #e61e1e 78.3% 81.0%,   /* 29: Rojo */
+        #1a1a1a 81.0% 83.7%,   /* 30: Negro */
+        #e61e1e 83.7% 86.4%,   /* 31: Rojo */
+        #1a1a1a 86.4% 89.1%,   /* 32: Negro */
+        #e61e1e 89.1% 91.8%,   /* 33: Rojo */
+        #1a1a1a 91.8% 94.5%,   /* 34: Negro */
+        #e61e1e 94.5% 97.2%,   /* 35: Rojo */
+        #1a1a1a 97.2% 100%     /* 36: Negro */
     );
     box-shadow: 0 0 40px rgba(0,0,0,0.6), 0 0 20px rgba(255,255,255,0.05);
-    transition: transform 3s cubic-bezier(0.1, 0, 0.1, 1);
+    transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1);
 }
 
 .wheel-pointer {
@@ -103,7 +122,17 @@
     padding: 10px 20px;
     font-weight: bold;
     min-width: 120px;
+    transition: all 0.3s ease;
 }
+
+.btn-bet-color.rojo { border-color: #ff4d4d; color: #ff4d4d; }
+.btn-bet-color.rojo.active { background: #ff4d4d; color: white; box-shadow: 0 0 15px rgba(255, 77, 77, 0.5); }
+
+.btn-bet-color.negro { border-color: #444; color: #ccc; }
+.btn-bet-color.negro.active { background: #1a1a1a; color: white; border-color: #666; box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
+
+.btn-bet-color.verde { border-color: #00ff88; color: #00ff88; }
+.btn-bet-color.verde.active { background: #00ff88; color: black; box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
 
 .active-selection {
     border-width: 2px !important;

@@ -123,6 +123,23 @@ export const playSound = (type) => {
             oscillator.stop(now + 0.1);
             break;
 
+        case 'victory':
+            // Una secuencia de notas ascendentes triunfales
+            const winNotes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+            winNotes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + i * 0.1);
+                gain.gain.setValueAtTime(0.1, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0, now + i * 0.1 + 0.3);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.3);
+            });
+            break;
+
         case 'click':
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(800, now);

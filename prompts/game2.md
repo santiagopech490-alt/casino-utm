@@ -34,8 +34,8 @@ La mecánica es una ruleta (Verde, Rojo, Negro). El usuario inicia con 100 ficha
 * Contenedor de conclusión (oculto).
 
 **2. `domain/probability_engine.js` (Actualización - Lógica Pura):**
-* Exportar función `spinRoulette()` que devuelva un resultado basado en la ruleta europea (1 Verde, 18 Rojos, 18 Negros). Probabilidades reales: Verde ~2.7%, Rojo ~48.6%, Negro ~48.6%.
-* Exportar función `calculatePayout(betAmount, betColor, resultColor)` para devolver las ganancias o pérdidas netas. (Rojo/Negro paga 1:1, Verde usualmente paga más, ej. 14:1 o 35:1, define uno que mantenga la ventaja de la casa).
+* Exportar función `spinRoulette()` que devuelva un resultado basado en la ruleta (1 Verde, 18 Rojos, 18 Negros). Para consistencia visual con el diseño CSS, se utilizará un mapeo simplificado: 0 es Verde, números Impares son Rojos y números Pares son Negros.
+* Exportar función `calculatePayout(betAmount, betColor, resultColor)` para devolver las ganancias o pérdidas netas. (Rojo/Negro paga 1:1, Verde paga 35:1).
 
 **3. `domain/game_rules.js` (Nuevo - Reglas de Negocio):**
 * Exportar función `validateBet(currentChips, betAmount)` para asegurar que la apuesta sea en múltiplos de 10, máximo 100, y no exceda el límite de deuda (-1000).
@@ -44,7 +44,7 @@ La mecánica es una ruleta (Verde, Rojo, Negro). El usuario inicia con 100 ficha
 * **Gestión de Estado:** Reiniciar el historial y rondas en cada llamada a `initGame2`.
 * Importar lógica matemática, reglas de negocio y `sound_manager.js`.
 * Estado local: Fichas, límite de deuda, color seleccionado, apuesta actual.
-* Lógica al Girar: Validar apuesta, restar fichas temporalmente, animar la ruleta (esperar asíncronamente), obtener resultado, aplicar ganancias/pérdidas, y actualizar el DOM.
+* Lógica al Girar: Validar apuesta, restar fichas, animar la ruleta calculando la rotación precisa para que el puntero coincida con el color y número del resultado, obtener resultado, aplicar ganancias y actualizar el DOM.
 * **Explicación del Mito:** Tras 10 rondas o al alcanzar una deuda significativa, mostrar dinámicamente que la "ventaja de la casa" (el cero verde) hace que la **Esperanza Matemática sea negativa (-2.7%)**, asegurando que el casino siempre gane a largo plazo.
 * Lógica de "Bancarrota" (al llegar a -1000): Ocultar controles y mostrar conclusión final rompiendo el mito con los datos reales de la sesión.
 

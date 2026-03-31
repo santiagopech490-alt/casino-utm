@@ -42,6 +42,9 @@ const setupEventListeners = () => {
     const btnFlip1 = document.getElementById('btn-flip-1');
     const btnFlip20 = document.getElementById('btn-flip-20');
     const btnReset = document.getElementById('btn-reset');
+    const inputBet = document.getElementById('input-bet-amount');
+    const btnBetPlus = document.getElementById('btn-bet-plus');
+    const btnBetMinus = document.getElementById('btn-bet-minus');
 
     // Selección Cara/Cruz
     document.querySelectorAll('.btn-choice').forEach(btn => {
@@ -54,6 +57,41 @@ const setupEventListeners = () => {
         };
     });
 
+    if (inputBet) {
+        inputBet.oninput = (e) => {
+            let val = parseInt(e.target.value);
+            if (!isNaN(val) && val >= 1) {
+                state.currentBet = val;
+            }
+        };
+        inputBet.onblur = (e) => {
+            let val = parseInt(e.target.value);
+            if (isNaN(val) || val < 1) val = 1;
+            state.currentBet = val;
+            e.target.value = val;
+        };
+    }
+
+    if (btnBetPlus) {
+        btnBetPlus.onclick = () => {
+            state.currentBet += 10;
+            if (inputBet) inputBet.value = state.currentBet;
+            playSound('click');
+        };
+    }
+
+    if (btnBetMinus) {
+        btnBetMinus.onclick = () => {
+            if (state.currentBet > 10) {
+                state.currentBet -= 10;
+            } else if (state.currentBet > 1) {
+                state.currentBet = 1;
+            }
+            if (inputBet) inputBet.value = state.currentBet;
+            playSound('click');
+        };
+    }
+
     if (btnFlip1) btnFlip1.onclick = handleFlip;
     if (btnFlip20) btnFlip20.onclick = handleBatchSimulation;
     if (btnReset) btnReset.onclick = () => {
@@ -65,7 +103,7 @@ const setupEventListeners = () => {
 const handleFlip = async () => {
     if (state.isFlipping || !state.userChoice) return;
 
-    // Usar apuesta fija o del wallet si existiera selector (aquí 10 por defecto)
+    // Validar apuesta
     const validation = Rules.validateBet(Wallet.getBalance(), state.currentBet);
     if (!validation.isValid) {
         Wallet.showError("Apuesta no válida", validation.message);
@@ -80,14 +118,15 @@ const handleFlip = async () => {
     const coinEl = document.getElementById('coin');
     const result = Probability.flipCoinPure();
     
-    // Animación de la moneda (Side A: Cara, Side B: Cruz)
+    // Animación de la moneda (Sincronizada con CSS)
     if (coinEl) {
-        coinEl.classList.remove('animate-heads', 'animate-tails');
+        coinEl.classList.remove('animate-flip-cara', 'animate-flip-cruz');
         void coinEl.offsetWidth; // Force reflow
-        coinEl.classList.add(result === 'cara' ? 'animate-heads' : 'animate-tails');
+        coinEl.classList.add(result === 'cara' ? 'animate-flip-cara' : 'animate-flip-cruz');
     }
     
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Tiempo de la animación (coincidir con CSS: 1.2s + margen)
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Lógica de Ganancia
     state.history.push(result);
@@ -99,7 +138,7 @@ const handleFlip = async () => {
         showVictory('La Falacia del Jugador', prize, '🪙');
     } else {
         state.losses++;
-        playSound('click'); 
+        playSound('miss'); 
     }
 
     state.isFlipping = false;
@@ -125,6 +164,7 @@ const updateUI = () => {
     const statHits = document.getElementById('stat-hits');
     const statMisses = document.getElementById('stat-misses');
     const timeline = document.getElementById('sequence-timeline');
+    const inputBet = document.getElementById('input-bet-amount');
 
     const stats = Probability.calculateStats(state.history);
     
@@ -135,12 +175,17 @@ const updateUI = () => {
     if (percCruces) percCruces.textContent = `${stats.cruzPct}%`;
     if (statHits) statHits.textContent = state.wins;
     if (statMisses) statMisses.textContent = state.losses;
+    
+    // Solo actualizar el input si no está enfocado (para evitar interrumpir al usuario)
+    if (inputBet && document.activeElement !== inputBet) {
+        inputBet.value = state.currentBet;
+    }
 
     if (timeline) {
         timeline.innerHTML = '';
         state.history.slice(-15).forEach(res => {
             const bubble = document.createElement('div');
-            bubble.className = `timeline-item ${res === 'cara' ? 'is-cara' : 'is-cruz'}`;
+            bubble.className = `timeline-bubble ${res === 'cara' ? 'bubble-cara' : 'bubble-cruz'}`;
             bubble.textContent = res === 'cara' ? 'C' : 'X';
             timeline.appendChild(bubble);
         });

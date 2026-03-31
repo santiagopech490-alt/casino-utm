@@ -49,24 +49,25 @@ export class EpidemicEngine {
     }
 
     update() {
+        const margin = 45; // Diámetro del nodo en CSS
         this.nodes.forEach(node => {
             node.x += node.vx;
             node.y += node.vy;
 
-            // Rebote en paredes con márgenes dinámicos
+            // Rebote en paredes con márgenes precisos
             if (node.x <= 0) {
                 node.x = 0;
                 node.vx = Math.abs(node.vx);
-            } else if (node.x >= this.width - 60) {
-                node.x = this.width - 60;
+            } else if (node.x >= this.width - margin) {
+                node.x = this.width - margin;
                 node.vx = -Math.abs(node.vx);
             }
 
             if (node.y <= 0) {
                 node.y = 0;
                 node.vy = Math.abs(node.vy);
-            } else if (node.y >= this.height - 60) {
-                node.y = this.height - 60;
+            } else if (node.y >= this.height - margin) {
+                node.y = this.height - margin;
                 node.vy = -Math.abs(node.vy);
             }
         });

@@ -28,6 +28,16 @@
                 <span class="coin-icon">X</span> Cruz
             </button>
         </div>
+
+        <div class="bet-selector glass-panel-dark" style="margin: 20px 0; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 20px; border-radius: 10px;">
+            <span style="color: #ccc; font-size: 0.9rem;">Apuesta:</span>
+            <div class="amount-selector" style="display: flex; align-items: center; gap: 15px;">
+                <button id="btn-bet-minus" class="glass-btn" style="padding: 5px 15px; min-width: 40px;">-</button>
+                <input type="number" id="input-bet-amount" min="1" max="1000" step="10" value="10" 
+                    style="width: 80px; text-align: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--neon-green); border-radius: 5px; font-size: 1.3rem; font-weight: bold; outline: none;">
+                <button id="btn-bet-plus" class="glass-btn" style="padding: 5px 15px; min-width: 40px;">+</button>
+            </div>
+        </div>
         
         <div class="action-group">
             <button id="btn-flip-1" class="glass-btn primary-btn" disabled>Lanzar 1x1</button>

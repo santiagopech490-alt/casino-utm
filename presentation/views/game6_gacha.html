@@ -1,11 +1,11 @@
 <div class="game-container game6-layout underground-shop">
     <!-- Cabecera del Juego -->
     <header class="game-header" style="margin-bottom: 25px; padding: 0 15px;">
-        <h2 class="text-neon-gold" style="font-size: 2.2rem; text-transform: uppercase; letter-spacing: 2px;">Gacha Card Simulator</h2>
+        <h2 class="text-neon-gold" style="font-size: 2.2rem; text-transform: uppercase; letter-spacing: 2px;">Simulador de Cartas Gacha</h2>
         <div class="myth-box glass-panel-dark" style="padding: 15px; border-left: 5px solid #f59e0b; margin-top: 15px; background: rgba(0, 0, 0, 0.6);">
-            <p style="margin-bottom: 10px; color: #f59e0b;"><strong>[MITO_DETECTADO]:</strong> "Si compras muchas cajas, seguro obtendrás el objeto legendario."</p>
+            <p style="margin-bottom: 10px; color: #f59e0b;"><strong>Mito:</strong> "Si compras muchas cajas, seguro obtendrás el objeto legendario."</p>
             <p id="myth-explanation" style="font-size: 0.9em; line-height: 1.5; color: #ccc; font-family: 'Courier New', Courier, monospace;">
-                [SISTEMA_REPORTE]: Este mito se rompió al demostrar la <strong>Independencia de Eventos</strong>. En este simulador (versión educativa), no existen sistemas de "garantía" o "pity". Cada sobre abierto tiene exactamente un 5% de probabilidad, sin importar cuántos miles hayas abierto antes. La probabilidad acumulada de fallo puede ser alta, pero nunca garantiza un éxito futuro.
+                Este mito se rompió al demostrar la <strong>Independencia de Eventos</strong>. En este simulador educativo, no existen sistemas de "garantía" o "pity". Cada sobre abierto tiene exactamente un 5% de probabilidad, sin importar cuántos miles hayas abierto antes. La probabilidad acumulada de fallo puede ser alta, pero nunca garantiza un éxito futuro.
             </p>
         </div>
     </header>
@@ -13,67 +13,99 @@
     <!-- Dashboard en tiempo real (Estilo Terminal) -->
     <header class="gacha-dashboard terminal-panel">
         <div class="dash-item">
-            <span class="dash-label">DATA_LOG</span>
+            <span class="dash-label">REGISTRO_DATOS</span>
             <strong id="stat-total-rolls" class="dash-value">0</strong>
         </div>
         <div class="dash-item">
-            <span class="dash-label">LEGEND_CNT</span>
+            <span class="dash-label">LEGENDARIAS</span>
             <strong id="stat-legendaries" class="dash-value text-neon-gold">0</strong>
         </div>
         <div class="dash-item">
-            <span class="dash-label">DRY_STREAK</span>
+            <span class="dash-label">RACHA_FALLOS</span>
             <strong id="stat-dry-streak" class="dash-value text-neon-red">0</strong>
         </div>
         <div class="dash-item">
-            <span class="dash-label">EXPECTED_VAL</span>
+            <span class="dash-label">VALOR_ESPERADO</span>
             <strong id="stat-expected" class="dash-value text-neon-blue">0.00</strong>
         </div>
         <div class="dash-item" style="border: none;">
-            <button id="btn-reset-gacha" class="glass-btn danger-btn small-btn" style="padding: 2px 10px; font-size: 0.7rem;">RESET_LOG</button>
+            <button id="btn-reset-gacha" class="glass-btn danger-btn small-btn" style="padding: 2px 10px; font-size: 0.7rem;">REINICIAR_LOG</button>
         </div>
     </header>
 
     <div class="gacha-main-area">
         <!-- Pila de TVs (Contenedor de Tirada) -->
         <div id="tv-piles" class="tv-pile-container">
+            <!-- TV Izquierda: Mensajes Raros -->
+            <div class="tv-deco left crt">
+                <div class="tv-inner-content">
+                    <div id="tv-rare-text" class="status-glitch small-text">SINC_RARA_OK</div>
+                </div>
+            </div>
+
+            <!-- TV Central: Mensajes Legendarios -->
             <div class="tv-main-screen crt">
                 <div class="tv-inner-content">
-                    <div id="gacha-status-text" class="status-glitch">ESTADÍSTICA PUREZA 100%</div>
+                    <div id="gacha-status-text" class="status-glitch">PUREZA ESTADÍSTICA 100%</div>
                     <div id="tv-static-overlay" class="static-layer hidden"></div>
                 </div>
             </div>
-            <!-- Decoración de TVs pequeñas a los lados -->
-            <div class="tv-deco left crt"></div>
-            <div class="tv-deco right crt"></div>
+
+            <!-- TV Derecha: Mensajes Épicos -->
+            <div class="tv-deco right crt">
+                <div class="tv-inner-content">
+                    <div id="tv-epic-text" class="status-glitch small-text">SINC_EPICA_OK</div>
+                </div>
+            </div>
         </div>
 
         <div class="gacha-shop-section">
             <div class="shop-card neon-card">
-                <h3>MAZO_BASIC</h3>
+                <h3>MAZO BÁSICO</h3>
                 <p>10 UNIDADES</p>
                 <div class="price-tag">160 CR</div>
-                <button id="btn-buy-10" class="neon-btn gold-btn">OPEN_10</button>
+                <button id="btn-buy-10" class="neon-btn gold-btn">ABRIR_10</button>
             </div>
 
             <div class="shop-card neon-card featured">
                 <div class="promo-badge">PROMO_100</div>
-                <h3>MAZO_ELITE</h3>
+                <h3>MAZO ÉLITE</h3>
                 <p>100 UNIDADES</p>
                 <div class="price-tag">1400 CR</div>
-                <button id="btn-buy-100" class="neon-btn purple-btn">OPEN_100</button>
+                <button id="btn-buy-100" class="neon-btn purple-btn">ABRIR_100</button>
             </div>
         </div>
     </div>
 
     <!-- Contenedor de cartas (Resultados) -->
     <section id="gacha-display-area" class="results-container">
-        <!-- Las cartas aparecerán aquí con el efecto de ZZZ -->
+        <!-- Las cartas aparecerán aquí -->
         <div class="empty-state">
             <p>ESPERANDO SEÑAL...</p>
         </div>
     </section>
 
-    <!-- Modal Educativo: Módulo de Realidad Estadística (Estilo Error de Sistema) -->
+    <!-- Notificaciones Emergentes (Toasts) -->
+    <div id="gacha-toast-container" class="toast-container"></div>
+
+    <!-- Modal de Victoria Legendaria -->
+    <div id="victory-modal" class="modal-overlay hidden">
+        <div class="system-error-panel modal-content victory-content" style="border-color: #f59e0b;">
+            <div class="error-header">
+                <span class="error-icon">💎</span>
+                <h2 class="glitch-text" data-text="SIMULADOR GACHA: ¡LEGENDARIA!">SIMULADOR GACHA: ¡LEGENDARIA!</h2>
+            </div>
+            <div class="terminal-stats-box" style="text-align: center; padding: 20px;">
+                <p class="text-neon-gold" style="font-size: 1.2rem; margin-bottom: 15px;">¡FELICIDADES! Has obtenido una carta LEGENDARIA en el Simulador de Cartas Gacha.</p>
+                <div class="stat-line" style="border-top: 1px solid rgba(245, 158, 11, 0.3); padding-top: 15px;">
+                    <p style="font-size: 0.9rem; color: #ccc;">[AVISO_EDUCATIVO]: Recuerda que el azar no tiene memoria. La probabilidad para tu siguiente sobre sigue siendo exactamente del <strong>5%</strong>.</p>
+                </div>
+            </div>
+            <button id="btn-close-victory" class="neon-btn gold-btn" style="width: 100%;">CONTINUAR</button>
+        </div>
+    </div>
+
+    <!-- Modal Educativo: Módulo de Realidad Estadística -->
     <div id="education-modal" class="modal-overlay hidden">
         <div class="system-error-panel modal-content education-content">
             <div class="error-header">

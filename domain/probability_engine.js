@@ -59,10 +59,10 @@ export const spinRoulette = () => {
 
     if (number === 0) {
         color = 'verde';
-    } else if ((number >= 1 && number <= 10) || (number >= 19 && number <= 28)) {
-        color = number % 2 === 0 ? 'negro' : 'rojo';
     } else {
-        color = number % 2 === 0 ? 'rojo' : 'negro';
+        // Para simplificar la visualización y que coincida con el diseño de la ruleta CSS,
+        // usaremos una alternancia pura: Impares = Rojo, Pares = Negro.
+        color = (number % 2 !== 0) ? 'rojo' : 'negro';
     }
 
     return { number, color };

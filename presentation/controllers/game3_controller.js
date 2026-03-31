@@ -3,15 +3,14 @@
  * GAME 3 CONTROLLER - La Carta que Nunca Sale (Refactorizado)
  * =========================================
  */
-import * as ProbEngine from '../../domain/probability_engine.js';
 import * as Wallet from '../../domain/wallet_manager.js';
 import { playSound } from '../../domain/sound_manager.js';
 import { showVictory } from '../components/victory_modal.js';
 
 let gameState = {
     mode: '1x1', // '1x1' | 'full20'
-    targetNumber: 7,
-    lastTarget: 7,
+    targetNumber: null,
+    lastTarget: null,
     abandonedTarget: null,
     betAmount: 10,
     hits: 0,
@@ -37,7 +36,7 @@ export const initGame3 = () => {
 };
 
 const cacheDOM = () => {
-    const container = document.querySelector('.game-container');
+    const container = document.querySelector('.game6-layout') || document.querySelector('.game-container'); // Safety check for layout
     if (!container) return;
 
     ui = {
@@ -57,19 +56,20 @@ const cacheDOM = () => {
         hotColdText: container.querySelector('#hot-cold-text'),
         mode1x1: container.querySelector('#btn-mode-1x1'),
         modeFull20: container.querySelector('#btn-mode-full20'),
-        hintText: container.querySelector('#hint-text'),
-        conclusion: container.querySelector('#game-conclusion'),
-        conclusionText: container.querySelector('#conclusion-text'),
-        btnPlayAgain: container.querySelector('#btn-play-again-cards')
+        hintText: container.querySelector('#hint-text')
     };
 };
 
 const bindEvents = () => {
     ui.inputTarget.onchange = (e) => {
         const val = parseInt(e.target.value);
-        if (val !== gameState.targetNumber) {
-            gameState.abandonedTarget = gameState.targetNumber;
-            gameState.targetNumber = val;
+        if (isNaN(val) || val < 1 || val > 20) {
+            gameState.targetNumber = null;
+        } else {
+            if (val !== gameState.targetNumber) {
+                gameState.abandonedTarget = gameState.targetNumber;
+                gameState.targetNumber = val;
+            }
         }
         playSound('click');
     };
@@ -78,14 +78,19 @@ const bindEvents = () => {
     ui.btnBetMinus.onclick = () => changeBet(-10);
     
     ui.btnRevealAction.onclick = () => {
+        if (!validateInput()) return;
         if (gameState.mode === '1x1') handleDraw1x1();
         else handleDrawFull20();
     };
 
-    ui.btnRevealAll.onclick = handleDrawFull20; // Compatibility if needed
-    
+    ui.btnRevealAll.onclick = () => {
+        if (!validateInput()) return;
+        // Revelar todas fuerza el modo Full 20 temporalmente si estamos en 1x1? 
+        // El usuario dijo "no elimines el boton", así que lo haré funcional.
+        handleDrawFull20();
+    };
+
     ui.btnReset.onclick = () => {
-        // Reset stats
         gameState.hits = 0;
         gameState.missedOpportunities = 0;
         for (let i = 1; i <= 20; i++) gameState.frequencies[i] = 0;
@@ -96,10 +101,14 @@ const bindEvents = () => {
 
     ui.mode1x1.onclick = () => setMode('1x1');
     ui.modeFull20.onclick = () => setMode('full20');
-    
-    if (ui.btnPlayAgain) {
-        ui.btnPlayAgain.onclick = resetBoard;
+};
+
+const validateInput = () => {
+    if (gameState.targetNumber === null || isNaN(gameState.targetNumber)) {
+        alert("Por favor, selecciona un número entre 1 y 20.");
+        return false;
     }
+    return true;
 };
 
 const setMode = (mode) => {
@@ -108,9 +117,9 @@ const setMode = (mode) => {
     ui.modeFull20.classList.toggle('active', mode === 'full20');
     
     if (mode === 'full20') {
-        ui.hintText.textContent = "Se generarán 20 resultados simultáneos";
+        ui.hintText.textContent = "Se generará un mazo completo (1-20) sin repeticiones";
     } else {
-        ui.hintText.textContent = "Selecciona tu carta y presiona Jugar";
+        ui.hintText.textContent = "Modo con reposición: la misma carta puede repetirse";
     }
     playSound('click');
     resetBoard();
@@ -132,7 +141,6 @@ const resetBoard = () => {
     
     renderInitialCards();
     checkHotCold();
-    ui.conclusion.classList.add('hidden');
 };
 
 const renderInitialCards = () => {
@@ -151,26 +159,47 @@ const renderInitialCards = () => {
 };
 
 const handleDraw1x1 = () => {
-    if (gameState.gameEnded) resetBoard();
+    if (gameState.gameEnded) {
+        resetBoard();
+        return;
+    }
     
-    // Draw one number
+    if (!Wallet.hasEnoughChips(gameState.betAmount)) {
+        alert("¡No tienes suficientes fichas!");
+        return;
+    }
+
     const result = Math.floor(Math.random() * 20) + 1;
     gameState.gameEnded = true;
 
-    // Process result
-    processResult(result, 0); // 0 is the card index to reveal (middle one or first one)
+    processResult(result);
     
-    // Visual: flip only one card (e.g. the first one for simplicity or a random one)
     const cards = ui.cardsGrid.querySelectorAll('.mini-card');
     const randomIndex = Math.floor(Math.random() * 20);
     revealCard(cards[randomIndex], result, result === gameState.targetNumber);
 };
 
 const handleDrawFull20 = () => {
-    if (gameState.gameEnded) resetBoard();
+    if (gameState.gameEnded) {
+        resetBoard();
+        return;
+    }
+
+    if (!Wallet.hasEnoughChips(gameState.betAmount)) {
+        alert("¡No tienes suficientes fichas!");
+        return;
+    }
     
     gameState.gameEnded = true;
-    const results = ProbEngine.generateDeck(20, 1, 20);
+    
+    // Generar mazo de 20 números ÚNICOS
+    const results = [];
+    for (let i = 1; i <= 20; i++) results.push(i);
+    for (let i = results.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [results[i], results[j]] = [results[j], results[i]];
+    }
+
     const cards = ui.cardsGrid.querySelectorAll('.mini-card');
     let batchHits = 0;
 
@@ -179,7 +208,6 @@ const handleDrawFull20 = () => {
             const isWin = res === gameState.targetNumber;
             revealCard(cards[i], res, isWin);
             
-            // Actualizar lógica interna
             gameState.frequencies[res]++;
             gameState.history.push(res);
             if (gameState.history.length > 100) gameState.history.shift();
@@ -187,20 +215,17 @@ const handleDrawFull20 = () => {
             if (isWin) {
                 batchHits++;
                 gameState.hits++;
-                Wallet.addChips(10);
+                Wallet.addChips(gameState.betAmount);
             } else {
-                Wallet.subtractChips(10);
+                Wallet.subtractChips(gameState.betAmount / 20);
             }
 
-            // Al llegar a la última carta del lote
             if (i === 19) {
                 updateUI();
                 renderFrequencies();
                 if (batchHits > 0) {
                     setTimeout(() => {
-                        showVictory('¡Número Encontrado!', 10 * batchHits, '🃏', () => {
-                            // Al cerrar el modal, NO reseteamos nada del estado persistente
-                        });
+                        showVictory('¡Encontrada!', gameState.betAmount, '🃏');
                     }, 500);
                 }
             }
@@ -213,42 +238,35 @@ const revealCard = (el, val, isWin) => {
     front.textContent = val;
     front.classList.add(isWin ? 'win' : 'loss');
     el.classList.add('is-flipped');
-    playSound(isWin ? 'victory' : 'miss');
+    playSound(isWin ? 'victory' : 'reveal');
 };
 
-const processResult = (result, index, isBatch = false) => {
-    if (isBatch) return; // Full 20 se gestiona en su propia función
-
-    // Update Frequencies (PERSISTENT)
+const processResult = (result) => {
     gameState.frequencies[result]++;
     gameState.history.push(result);
     if (gameState.history.length > 100) gameState.history.shift();
     
-    // Check Missed Opportunity
     if (gameState.abandonedTarget === result) {
         gameState.missedOpportunities++;
         gameState.abandonedTarget = null;
         playSound('error');
     }
 
-    // Economy
     if (result === gameState.targetNumber) {
         gameState.hits++;
-        Wallet.addChips(10);
+        Wallet.addChips(gameState.betAmount);
         updateUI();
         renderFrequencies();
-        showVictory('¡Acierto!', 10, '🃏', () => {
-            // No resetear aquí automáticamente
-        });
+        showVictory('¡Acierto!', gameState.betAmount, '🃏');
     } else {
-        Wallet.subtractChips(10);
+        Wallet.subtractChips(gameState.betAmount);
         updateUI();
         renderFrequencies();
+        playSound('miss');
     }
 };
 
 const checkHotCold = () => {
-    // No limpiar el banner si no es necesario, solo actualizarlo basado en el historial persistente
     const coldNumbers = [];
     for (let i = 1; i <= 20; i++) {
         if (!gameState.history.slice(-20).includes(i)) {
@@ -276,7 +294,7 @@ const renderFrequencies = () => {
 };
 
 const updateUI = () => {
-    ui.statHits.textContent = gameState.hits;
-    ui.statMissed.textContent = gameState.missedOpportunities;
+    if (ui.statHits) ui.statHits.textContent = gameState.hits;
+    if (ui.statMissed) ui.statMissed.textContent = gameState.missedOpportunities;
     Wallet.updateUI();
 };

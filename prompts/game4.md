@@ -18,16 +18,17 @@
 - **Simulación Dinámica**: Motor de partículas estilo Agar.io.
 - **Nodos**: Objetos `{ id, nombre, x, y, vx, vy, estado: 'sana' | 'contagiada' }`.
 - **Nombres**: Asignación de nombres aleatorios de una lista genérica.
+- **Límites de Pantalla**: Los nodos deben permanecer siempre dentro del área visible del contenedor, implementando rebotes precisos basados en el diámetro del nodo (45px) para evitar que se salgan de la vista.
 - **Regla de Contagio**: Basada en proximidad física (`infectionRadius`). Si un nodo sano está cerca de uno contagiado, existe probabilidad `p` de infección.
-- **Aceleración**: El límite de contagios por ronda aumenta automáticamente cada vez que se avanza.
-
+...
 ## 4. Requisitos de UI (`presentation/controllers/game4_controller.js`)
 - **Cabecera**: Título del juego y el mito: *"Un contagio ocurre al azar y no depende del contacto."*. Justo debajo, la breve explicación de cómo se rompió este mito mediante la demostración de la dependencia del contacto y la proximidad.
 - **Interacción Principal**: 
-  1. El usuario selecciona una persona sana.
-  2. Define el **Monto a Apostar** (mínimo 5 fichas).
-  3. **Validación de Saldo**: Antes de procesar la ronda, se debe verificar que el usuario tenga suficientes fichas. Si no, se muestra un mensaje de "Fichas insuficientes".
-  4. Al presionar "Siguiente Ronda", se ejecuta el motor y se actualiza el wallet según el resultado.
+  1. El usuario puede seleccionar una o **múltiples personas sanas** simultáneamente.
+  2. Define el **Monto a Apostar** por cada persona seleccionada.
+  3. **Validación de Saldo**: Antes de procesar la ronda, se debe verificar que el usuario tenga suficientes fichas para cubrir la apuesta total (apuesta individual x cantidad de personas seleccionadas).
+  4. Al presionar "Siguiente Ronda", se ejecuta el motor y se actualiza el wallet según los contagios logrados entre los seleccionados.
+
 - **Visualización**: Animación fluida mediante `requestAnimationFrame` a 60 FPS.
 - **Título Dinámico**: El título de la aplicación debe actualizarse para mostrar la ronda actual (ej: "Contagio Dinámico - Ronda 1"). Esta actualización debe ocurrir solo cuando cambie el estado del juego (inicio, siguiente ronda, reinicio) para evitar conflictos con el router de la SPA.
 - **Feedback**: Mensajes personalizados usando el nombre de la persona seleccionada.
